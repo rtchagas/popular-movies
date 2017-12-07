@@ -42,24 +42,28 @@ public class MovieController {
         mTmdbApi = retrofit.create(TmdbAPI.class);
     }
 
-    public void loadMovies(MovieSort criteria, @NonNull final OnMovieSearchResultListener resultListener) {
+    public void loadMoviesAsync(MovieSort criteria, @NonNull final OnMovieSearchResultListener resultListener) {
+
+        Callback<SearchResult> resultCallback = new Callback<SearchResult>() {
+
+            @Override
+            public void onResponse(Call<SearchResult> call, Response<SearchResult> response) {
+                if (response.body() != null) {
+                    resultListener.onResultReady(response.body().getMovieList());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<SearchResult> call, Throwable t) {
+                resultListener.onResultError(t.getMessage());
+            }
+        };
 
         if (MovieSort.POPULARITY == criteria) {
-
-            mTmdbApi.getPopular().enqueue(new Callback<SearchResult>() {
-
-                @Override
-                public void onResponse(Call<SearchResult> call, Response<SearchResult> response) {
-                    if (response.body() != null) {
-                        resultListener.onResultReady(response.body().getMovieList());
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<SearchResult> call, Throwable t) {
-                    resultListener.onResultError(t.getMessage());
-                }
-            });
+            mTmdbApi.getPopular().enqueue(resultCallback);
+        }
+        else {
+            mTmdbApi.getTopRated().enqueue(resultCallback);
         }
     }
 
