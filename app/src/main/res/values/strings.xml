@@ -4,4 +4,6 @@
     <string name="try_again">Try again</string>
     <string name="no_internet">Oops! Internet isn\'t available</string>
     <string name="movies_loading_error">Oops! Couldn\'t load the movies…</string>
+    <string name="menu_movies_list_popular">Most Popular</string>
+    <string name="menu_movies_list_rating">Top Rated</string>
 </resources>

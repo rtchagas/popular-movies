@@ -69,7 +69,11 @@ public class MovieController {
 
     public enum MovieSort {
         POPULARITY,
-        TOP_RATED
+        TOP_RATED;
+
+        public static MovieSort from(int ordinal) {
+            return values()[ordinal];
+        }
     }
 
 }
