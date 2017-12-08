@@ -1,6 +1,7 @@
 package com.rtchagas.udacity.popularmovies.presentation;
 
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
@@ -12,6 +13,7 @@ import android.widget.ProgressBar;
 
 import com.rtchagas.udacity.popularmovies.R;
 import com.rtchagas.udacity.popularmovies.controller.MovieController;
+import com.rtchagas.udacity.popularmovies.controller.MovieController.MovieSort;
 import com.rtchagas.udacity.popularmovies.controller.OnMovieSearchResultListener;
 import com.rtchagas.udacity.popularmovies.core.Movie;
 import com.rtchagas.udacity.popularmovies.presentation.adapter.MovieAdapter;
@@ -26,7 +28,7 @@ import butterknife.ButterKnife;
 public class MoviesListActivity extends AppCompatActivity implements OnMovieSearchResultListener {
 
     private static final String STATE_KEY_MOVIE_LIST = "movie_list";
-    private static final String STATE_KEY_SORT_ORDER = "sort_order";
+    private static final String PREF_KEY_SORT_ORDER = "sort_order";
 
     @BindView(R.id.pb_movies)
     ProgressBar mProgressBar;
@@ -37,7 +39,7 @@ public class MoviesListActivity extends AppCompatActivity implements OnMovieSear
     private List<Movie> mMovieList = null;
     private MovieAdapter mAdapter = null;
 
-    private MovieController.MovieSort mCurrentSortOrder = null;
+    private MovieSort mCurrentSortOrder = null;
 
     @Override
     @SuppressWarnings("unchecked")
@@ -54,21 +56,19 @@ public class MoviesListActivity extends AppCompatActivity implements OnMovieSear
                 getResources().getInteger(R.integer.movies_list_columns)));
         mMovieRecyclerView.setHasFixedSize(true);
 
+        // Get/Restore the current sort order
+        int sortValue = PreferenceManager.getDefaultSharedPreferences(this)
+                .getInt(PREF_KEY_SORT_ORDER, MovieSort.POPULARITY.ordinal());
+
         if (savedInstanceState != null) {
-
-            // Restore the current sort order
-            int value = savedInstanceState.getInt(STATE_KEY_SORT_ORDER);
-            mCurrentSortOrder = MovieController.MovieSort.from(value);
-
             // Restore the current movies list.
             onResultReady((ArrayList<Movie>) savedInstanceState
                     .getSerializable(STATE_KEY_MOVIE_LIST));
         }
         else {
             if (NetworkUtils.isInternetAvailable(this)) {
-                loadMoviesAsync(MovieController.MovieSort.POPULARITY);
-            }
-            else {
+                loadMoviesAsync(MovieSort.from(sortValue));
+            } else {
                 showTryAgainSnack(R.string.no_internet);
             }
         }
@@ -86,10 +86,10 @@ public class MoviesListActivity extends AppCompatActivity implements OnMovieSear
 
         switch (item.getItemId()) {
             case R.id.menu_movies_list_item_popular:
-                loadMoviesAsync(MovieController.MovieSort.POPULARITY);
+                loadMoviesAsync(MovieSort.POPULARITY);
                 return true;
             case R.id.menu_movies_list_item_rating:
-                loadMoviesAsync(MovieController.MovieSort.TOP_RATED);
+                loadMoviesAsync(MovieSort.TOP_RATED);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -102,10 +102,9 @@ public class MoviesListActivity extends AppCompatActivity implements OnMovieSear
         if (mMovieList != null) {
             outState.putSerializable(STATE_KEY_MOVIE_LIST, new ArrayList<>(mMovieList));
         }
-        outState.putInt(STATE_KEY_SORT_ORDER, mCurrentSortOrder.ordinal());
     }
 
-    private void loadMoviesAsync(MovieController.MovieSort newOrder) {
+    private void loadMoviesAsync(MovieSort newOrder) {
 
         // Avoid searching for the same content
         if (mCurrentSortOrder == newOrder) {
@@ -113,6 +112,10 @@ public class MoviesListActivity extends AppCompatActivity implements OnMovieSear
         }
 
         mCurrentSortOrder = newOrder;
+        // Save this order to preferences
+        PreferenceManager.getDefaultSharedPreferences(this).edit()
+                .putInt(PREF_KEY_SORT_ORDER, mCurrentSortOrder.ordinal())
+                .apply();
 
         MovieController movieController = MovieController.getInstance();
         movieController.loadMoviesAsync(mCurrentSortOrder, this);
