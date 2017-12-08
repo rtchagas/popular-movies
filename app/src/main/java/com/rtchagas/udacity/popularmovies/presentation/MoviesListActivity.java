@@ -8,7 +8,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import com.rtchagas.udacity.popularmovies.R;
 import com.rtchagas.udacity.popularmovies.controller.MovieController;
@@ -28,8 +28,8 @@ public class MoviesListActivity extends AppCompatActivity implements OnMovieSear
     private static final String STATE_KEY_MOVIE_LIST = "movie_list";
     private static final String STATE_KEY_SORT_ORDER = "sort_order";
 
-    @BindView(R.id.group_movie_list_progress)
-    ViewGroup mGroupMovieListProgress;
+    @BindView(R.id.pb_movies)
+    ProgressBar mProgressBar;
 
     @BindView(R.id.rv_movies)
     RecyclerView mMovieRecyclerView;
@@ -153,7 +153,8 @@ public class MoviesListActivity extends AppCompatActivity implements OnMovieSear
     }
 
     private void setProgressView(boolean isLoading) {
-        mGroupMovieListProgress.setVisibility((isLoading ? View.VISIBLE : View.GONE));
+        mProgressBar.setVisibility((isLoading ? View.VISIBLE : View.GONE));
+        // Looked better to keep the recyclerview visible while loading other results...
         //mMovieRecyclerView.setVisibility((isLoading ? View.GONE : View.VISIBLE));
     }
 

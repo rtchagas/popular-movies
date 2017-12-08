@@ -1,6 +1,5 @@
 <resources>
     <string name="app_name">Popular Movies</string>
-    <string name="loading">Loading…</string>
     <string name="try_again">Try again</string>
     <string name="no_internet">Oops! Internet isn\'t available</string>
     <string name="movies_loading_error">Oops! Couldn\'t load the movies…</string>
