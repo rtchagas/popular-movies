@@ -14,7 +14,8 @@ import retrofit2.http.Path;
 public interface TmdbAPI {
 
     String BASE_URL = "https://api.themoviedb.org/3/";
-    String BASE_IMG_URL = "http://image.tmdb.org/t/p/w342/";
+    String BASE_IMG_THUMB_URL = "http://image.tmdb.org/t/p/w342/";
+    String BASE_IMG_BACKDROP_URL = "http://image.tmdb.org/t/p/w500/";
 
     @GET("movie/popular?api_key=" + Config.TMDB_API_KEY)
     Call<SearchResult> getPopular();

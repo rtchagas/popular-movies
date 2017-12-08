@@ -7,6 +7,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -31,6 +32,9 @@ public class MoviesListActivity extends AppCompatActivity implements OnMovieSear
     private static final String STATE_KEY_MOVIE_LIST = "movie_list";
     private static final String PREF_KEY_SORT_ORDER = "sort_order";
 
+    @BindView(R.id.toolbar)
+    Toolbar mToolbar;
+
     @BindView(R.id.pb_movies)
     ProgressBar mProgressBar;
 
@@ -48,6 +52,7 @@ public class MoviesListActivity extends AppCompatActivity implements OnMovieSear
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_movies_list);
         ButterKnife.bind(this);
+        setSupportActionBar(mToolbar);
 
         mAdapter = new MovieAdapter(this);
 

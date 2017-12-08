@@ -57,7 +57,7 @@ public final class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieV
         Movie movie = mMoviesList.get(position);
 
         // Prepare the poster URL to be loaded
-        String imgUrl = TmdbAPI.BASE_IMG_URL + movie.getPosterPath();
+        String imgUrl = TmdbAPI.BASE_IMG_THUMB_URL + movie.getPosterPath();
 
         // Load the poster through Picasso
         Picasso.with(context).load(Uri.parse(imgUrl)).into(holder.ivPoster);

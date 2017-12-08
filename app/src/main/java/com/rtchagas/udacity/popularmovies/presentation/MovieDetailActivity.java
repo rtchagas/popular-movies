@@ -2,7 +2,9 @@ package com.rtchagas.udacity.popularmovies.presentation;
 
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
@@ -21,14 +23,20 @@ public class MovieDetailActivity extends AppCompatActivity {
 
     protected static final String EXTRA_MOVIE = "movie";
 
+    @BindView(R.id.toolbar)
+    Toolbar mToolbar;
+
+    @BindView(R.id.collapsing_toolbar)
+    CollapsingToolbarLayout mCollapsingToolbarLayout;
+
+    @BindView(R.id.iv_movie_backdrop)
+    ImageView mIvMovieBackdrop;
+
     @BindView(R.id.iv_movie_poster)
     ImageView mIvMoviePoster;
 
     @BindView(R.id.tv_movie_release_year)
     TextView mTvMovieReleaseDate;
-
-    @BindView(R.id.tv_movie_original_title)
-    TextView mTvMovieOriginalTitle;
 
     @BindView(R.id.tv_movie_rating)
     TextView mTvMovieRating;
@@ -44,6 +52,7 @@ public class MovieDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_movie_detail);
         ButterKnife.bind(this);
+        setSupportActionBar(mToolbar);
 
         // Get the movie from the incoming intent
         if ((getIntent().getExtras() != null) && getIntent().getExtras().containsKey(EXTRA_MOVIE)) {
@@ -58,11 +67,15 @@ public class MovieDetailActivity extends AppCompatActivity {
 
     private void fillMovieDetails(Movie movie) {
 
+        // Set movie backdrop
+        String imgUrl = TmdbAPI.BASE_IMG_BACKDROP_URL + movie.getBackdropPath();
+        Picasso.with(this).load(Uri.parse(imgUrl)).into(mIvMovieBackdrop);
+
         // Movie original title
-        mTvMovieOriginalTitle.setText(movie.getOriginalTitle());
+        mCollapsingToolbarLayout.setTitle(movie.getOriginalTitle());
 
         // Movie poster
-        String imgUrl = TmdbAPI.BASE_IMG_URL + movie.getPosterPath();
+        imgUrl = TmdbAPI.BASE_IMG_THUMB_URL + movie.getPosterPath();
         Picasso.with(this).load(Uri.parse(imgUrl)).into(mIvMoviePoster);
 
         // Movie release date
