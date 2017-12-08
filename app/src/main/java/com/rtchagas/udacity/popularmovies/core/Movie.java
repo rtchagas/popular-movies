@@ -4,6 +4,7 @@ package com.rtchagas.udacity.popularmovies.core;
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 
@@ -45,7 +46,7 @@ public class Movie implements Serializable {
     private String posterPath;
 
     @SerializedName("release_date")
-    private String releaseDate;
+    private Date releaseDate;
 
     @SerializedName("revenue")
     private int revenue;
@@ -160,11 +161,11 @@ public class Movie implements Serializable {
         this.posterPath = posterPath;
     }
 
-    public String getReleaseDate() {
+    public Date getReleaseDate() {
         return releaseDate;
     }
 
-    public void setReleaseDate(String releaseDate) {
+    public void setReleaseDate(Date releaseDate) {
         this.releaseDate = releaseDate;
     }
 

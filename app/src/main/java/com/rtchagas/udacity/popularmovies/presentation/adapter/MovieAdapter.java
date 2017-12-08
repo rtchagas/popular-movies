@@ -22,6 +22,12 @@ public final class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieV
 
     private List<Movie> mMoviesList = null;
 
+    private View.OnClickListener mItemClickListener = null;
+
+    public MovieAdapter(View.OnClickListener itemClickListener) {
+        mItemClickListener = itemClickListener;
+    }
+
     public void setMovies(List<Movie> movieList) {
         mMoviesList = movieList;
         notifyDataSetChanged();
@@ -37,8 +43,16 @@ public final class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieV
     @Override
     public void onBindViewHolder(MovieViewHolder holder, int position) {
 
+        // Set the click listener.
+        // I like to use the view's tag to avoid creating a special interface
+        // just for handling the item clicks.
+        if (mItemClickListener != null) {
+            holder.itemView.setTag(position);
+            holder.itemView.setOnClickListener(mItemClickListener);
+        }
+
         // Get context from any view inside view holder
-        Context context = holder.ivPoster.getContext();
+        Context context = holder.itemView.getContext();
 
         Movie movie = mMoviesList.get(position);
 

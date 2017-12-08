@@ -1,8 +1,11 @@
 package com.rtchagas.udacity.popularmovies.presentation;
 
+import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -25,7 +28,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MoviesListActivity extends AppCompatActivity implements OnMovieSearchResultListener {
+public class MoviesListActivity extends AppCompatActivity implements OnMovieSearchResultListener, View.OnClickListener {
 
     private static final String STATE_KEY_MOVIE_LIST = "movie_list";
     private static final String PREF_KEY_SORT_ORDER = "sort_order";
@@ -48,7 +51,7 @@ public class MoviesListActivity extends AppCompatActivity implements OnMovieSear
         setContentView(R.layout.activity_movies_list);
         ButterKnife.bind(this);
 
-        mAdapter = new MovieAdapter();
+        mAdapter = new MovieAdapter(this);
 
         // Configure the Recycler View
         mMovieRecyclerView.setAdapter(mAdapter);
@@ -153,6 +156,26 @@ public class MoviesListActivity extends AppCompatActivity implements OnMovieSear
 
         // Just show a snack..
         showTryAgainSnack(R.string.movies_loading_error);
+    }
+
+    @Override
+    /**
+     * Implementation of {@link android.view.View.OnClickListener}
+     */
+    public void onClick(View v) {
+
+        // Get the position that was clicked
+        int position = (int) v.getTag();
+
+        // Get the target movie
+        Movie movie = mMovieList.get(position);
+
+        // Send it to detail activity as extra
+        Intent detailIntent = new Intent(this, MovieDetailActivity.class);
+        detailIntent.putExtra(MovieDetailActivity.EXTRA_MOVIE, movie);
+
+        // Start the MovieDetailActivity
+        startActivity(detailIntent);
     }
 
     private void setProgressView(boolean isLoading) {
