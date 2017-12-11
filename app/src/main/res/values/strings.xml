@@ -7,4 +7,6 @@
     <string name="menu_movies_list_rating">Top Rated</string>
     <string name="movie_detail">Movie Details</string>
     <string name="movie_detail_rating">%.1f/10</string>
+    <string name="content_movie_poster">Movie poster</string>
+    <string name="content_movie_backdrop">Movie backdrop</string>
 </resources>

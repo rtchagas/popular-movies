@@ -61,6 +61,9 @@ public final class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieV
 
         // Load the poster through Picasso
         Picasso.with(context).load(Uri.parse(imgUrl)).into(holder.ivPoster);
+
+        // Dynamically add the content description to make easy for accessibility.
+        holder.ivPoster.setContentDescription(movie.getTitle());
     }
 
     @Override
@@ -70,7 +73,8 @@ public final class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieV
 
     class MovieViewHolder extends RecyclerView.ViewHolder {
 
-        @BindView(R.id.iv_poster) ImageView ivPoster;
+        @BindView(R.id.iv_poster)
+        ImageView ivPoster;
 
         public MovieViewHolder(View itemView) {
             super(itemView);
