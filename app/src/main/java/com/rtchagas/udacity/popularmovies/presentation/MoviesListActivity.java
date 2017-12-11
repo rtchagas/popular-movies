@@ -65,6 +65,7 @@ public class MoviesListActivity extends AppCompatActivity implements OnMovieSear
         // Get/Restore the current sort order
         int sortValue = PreferenceManager.getDefaultSharedPreferences(this)
                 .getInt(PREF_KEY_SORT_ORDER, MovieSort.POPULARITY.ordinal());
+        mCurrentSortOrder = MovieSort.from(sortValue);
 
         if (savedInstanceState != null) {
             // Restore the current movies list.
@@ -72,11 +73,7 @@ public class MoviesListActivity extends AppCompatActivity implements OnMovieSear
                     .getSerializable(STATE_KEY_MOVIE_LIST));
         }
         else {
-            if (NetworkUtils.isInternetAvailable(this)) {
-                loadMoviesAsync(MovieSort.from(sortValue));
-            } else {
-                showTryAgainSnack(R.string.no_internet);
-            }
+            loadMoviesAsync(mCurrentSortOrder, true);
         }
     }
 
@@ -110,10 +107,16 @@ public class MoviesListActivity extends AppCompatActivity implements OnMovieSear
         }
     }
 
-    private void loadMoviesAsync(MovieSort newOrder) {
+    private void loadMoviesAsync(MovieSort newOrder, boolean force) {
+
+        // We need internet :)
+        if (!NetworkUtils.isInternetAvailable(this)) {
+            showTryAgainSnack(R.string.no_internet);
+            return;
+        }
 
         // Avoid searching for the same content
-        if (mCurrentSortOrder == newOrder) {
+        if (!force && (mCurrentSortOrder == newOrder)) {
             return;
         }
 
@@ -128,6 +131,10 @@ public class MoviesListActivity extends AppCompatActivity implements OnMovieSear
 
         // Set the UI to indicate that the movies are being loaded.
         setProgressView(true);
+    }
+
+    private void loadMoviesAsync(MovieSort newOrder) {
+        loadMoviesAsync(newOrder, false);
     }
 
     /**
@@ -153,10 +160,6 @@ public class MoviesListActivity extends AppCompatActivity implements OnMovieSear
      */
     @Override
     public void onResultError(String message) {
-
-        // Hide the loading progress
-        setProgressView(false);
-
         // Just show a snack..
         showTryAgainSnack(R.string.movies_loading_error);
     }
@@ -189,12 +192,15 @@ public class MoviesListActivity extends AppCompatActivity implements OnMovieSear
 
     private void showTryAgainSnack(int msgId) {
 
+        // Hide the loading progress
+        setProgressView(false);
+
         Snackbar snackbar = Snackbar.make(findViewById(R.id.myCoordinatorLayout),
                 msgId, Snackbar.LENGTH_INDEFINITE);
         snackbar.setAction(R.string.try_again, new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                loadMoviesAsync(mCurrentSortOrder);
+                loadMoviesAsync(mCurrentSortOrder, true);
             }
         });
 
