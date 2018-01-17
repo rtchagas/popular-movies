@@ -16,8 +16,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:contentScrim="@color/colorSecondary"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed"
-            app:expandedTitleTextAppearance="@style/ToolbarExpandedTextWithShadow">
+            app:expandedTitleTextAppearance="@style/ToolbarExpandedTextWithShadow"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed">
 
             <ImageView
                 android:id="@+id/iv_movie_backdrop"
@@ -33,6 +33,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:elevation="4dp"
+                app:contentInsetStart="0dp"
+                app:contentInsetStartWithNavigation="0dp"
                 app:layout_collapseMode="pin"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -74,10 +76,10 @@
                 android:layout_marginLeft="32dp"
                 android:layout_marginStart="32dp"
                 android:layout_marginTop="16dp"
-                tools:text="12/08/2017"
                 android:textSize="28sp"
                 app:layout_constraintStart_toEndOf="@+id/iv_movie_poster"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="12/08/2017" />
 
             <TextView
                 android:id="@+id/tv_movie_rating"
@@ -115,6 +117,53 @@
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintStart_toStartOf="@+id/tv_movie_release_year"
                 app:layout_constraintTop_toBottomOf="@+id/tv_movie_rating" />
+
+            <TextView
+                android:id="@+id/tv_trailers"
+                style="@style/MovieSubItem"
+                android:layout_marginLeft="16dp"
+                android:layout_marginStart="16dp"
+                android:drawableLeft="@drawable/ic_videocam"
+                android:drawableStart="@drawable/ic_videocam"
+                android:text="@string/movie_trailers_tile"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/iv_movie_poster" />
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/rv_movie_trailers"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:layout_marginTop="12dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/tv_trailers"
+                app:layout_constraintTop_toBottomOf="@+id/tv_trailers" />
+
+            <TextView
+                android:id="@+id/tv_trailers_info"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:textStyle="italic"
+                app:layout_constraintEnd_toEndOf="@+id/rv_movie_trailers"
+                app:layout_constraintStart_toStartOf="@+id/rv_movie_trailers"
+                app:layout_constraintTop_toBottomOf="@+id/tv_trailers"
+                tools:text="Message to user when there is no trailers or internet is not available" />
+
+            <ProgressBar
+                android:id="@+id/pb_trailers"
+                style="@style/Base.Widget.AppCompat.ProgressBar"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginEnd="8dp"
+                android:layout_marginStart="8dp"
+                android:indeterminate="true"
+                app:layout_constraintEnd_toEndOf="@+id/rv_movie_trailers"
+                app:layout_constraintStart_toStartOf="@+id/rv_movie_trailers"
+                app:layout_constraintTop_toBottomOf="@+id/rv_movie_trailers" />
+
         </android.support.constraint.ConstraintLayout>
 
     </android.support.v4.widget.NestedScrollView>

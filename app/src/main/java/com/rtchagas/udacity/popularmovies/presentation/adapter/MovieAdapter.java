@@ -76,7 +76,7 @@ public final class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieV
         @BindView(R.id.iv_poster)
         ImageView ivPoster;
 
-        public MovieViewHolder(View itemView) {
+        MovieViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
         }

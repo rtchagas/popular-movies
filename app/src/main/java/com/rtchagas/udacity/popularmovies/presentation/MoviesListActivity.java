@@ -3,6 +3,7 @@ package com.rtchagas.udacity.popularmovies.presentation;
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
@@ -16,7 +17,7 @@ import android.widget.ProgressBar;
 import com.rtchagas.udacity.popularmovies.R;
 import com.rtchagas.udacity.popularmovies.controller.MovieController;
 import com.rtchagas.udacity.popularmovies.controller.MovieController.MovieSort;
-import com.rtchagas.udacity.popularmovies.controller.OnMovieSearchResultListener;
+import com.rtchagas.udacity.popularmovies.controller.OnSearchResultListener;
 import com.rtchagas.udacity.popularmovies.core.Movie;
 import com.rtchagas.udacity.popularmovies.presentation.adapter.MovieAdapter;
 import com.rtchagas.udacity.popularmovies.util.NetworkUtils;
@@ -27,7 +28,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MoviesListActivity extends AppCompatActivity implements OnMovieSearchResultListener, View.OnClickListener {
+public class MoviesListActivity extends AppCompatActivity implements OnSearchResultListener<Movie>, View.OnClickListener {
 
     private static final String STATE_KEY_MOVIE_LIST = "movie_list";
     private static final String PREF_KEY_SORT_ORDER = "sort_order";
@@ -126,8 +127,8 @@ public class MoviesListActivity extends AppCompatActivity implements OnMovieSear
                 .putInt(PREF_KEY_SORT_ORDER, mCurrentSortOrder.ordinal())
                 .apply();
 
-        MovieController movieController = MovieController.getInstance();
-        movieController.loadMoviesAsync(mCurrentSortOrder, this);
+        MovieController.getInstance()
+                .loadMoviesAsync(mCurrentSortOrder, this);
 
         // Set the UI to indicate that the movies are being loaded.
         setProgressView(true);
@@ -138,10 +139,10 @@ public class MoviesListActivity extends AppCompatActivity implements OnMovieSear
     }
 
     /**
-     * Implementation of {@link OnMovieSearchResultListener}
+     * Implementation of {@link OnSearchResultListener}
      */
     @Override
-    public void onResultReady(List<Movie> movieList) {
+    public void onResultReady(@Nullable List<Movie> movieList) {
 
         if (movieList != null) {
 
@@ -156,18 +157,18 @@ public class MoviesListActivity extends AppCompatActivity implements OnMovieSear
     }
 
     /**
-     * Implementation of {@link OnMovieSearchResultListener}
+     * Implementation of {@link OnSearchResultListener}
      */
     @Override
-    public void onResultError(String message) {
+    public void onResultError(@Nullable String message) {
         // Just show a snack..
         showTryAgainSnack(R.string.movies_loading_error);
     }
 
-    @Override
     /**
      * Implementation of {@link android.view.View.OnClickListener}
      */
+    @Override
     public void onClick(View v) {
 
         // Get the position that was clicked

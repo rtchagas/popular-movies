@@ -4,7 +4,10 @@ import android.support.annotation.NonNull;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.rtchagas.udacity.popularmovies.core.SearchResult;
+import com.rtchagas.udacity.popularmovies.core.Movie;
+import com.rtchagas.udacity.popularmovies.core.MovieSearchResult;
+import com.rtchagas.udacity.popularmovies.core.Trailer;
+import com.rtchagas.udacity.popularmovies.core.TrailerSearchResult;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -42,19 +45,19 @@ public class MovieController {
         mTmdbApi = retrofit.create(TmdbAPI.class);
     }
 
-    public void loadMoviesAsync(MovieSort criteria, @NonNull final OnMovieSearchResultListener resultListener) {
+    public void loadMoviesAsync(MovieSort criteria, @NonNull final OnSearchResultListener<Movie> resultListener) {
 
-        Callback<SearchResult> resultCallback = new Callback<SearchResult>() {
+        Callback<MovieSearchResult> resultCallback = new Callback<MovieSearchResult>() {
 
             @Override
-            public void onResponse(Call<SearchResult> call, Response<SearchResult> response) {
+            public void onResponse(Call<MovieSearchResult> call, Response<MovieSearchResult> response) {
                 if (response.body() != null) {
                     resultListener.onResultReady(response.body().getMovieList());
                 }
             }
 
             @Override
-            public void onFailure(Call<SearchResult> call, Throwable t) {
+            public void onFailure(Call<MovieSearchResult> call, Throwable t) {
                 resultListener.onResultError(t.getMessage());
             }
         };
@@ -67,6 +70,26 @@ public class MovieController {
         }
     }
 
+    public void getTrailersAsync(int movieId, @NonNull final OnSearchResultListener<Trailer> resultListener) {
+
+        Callback<TrailerSearchResult> resultCallback = new Callback<TrailerSearchResult>() {
+            @Override
+            public void onResponse(Call<TrailerSearchResult> call, Response<TrailerSearchResult> response) {
+                if (response.body() != null) {
+                    resultListener.onResultReady(response.body().getTrailers());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<TrailerSearchResult> call, Throwable t) {
+                resultListener.onResultError(t.getMessage());
+            }
+        };
+
+        // Call the API asynchronously.
+        mTmdbApi.getTrailers(movieId).enqueue(resultCallback);
+    }
+
     public enum MovieSort {
         POPULARITY,
         TOP_RATED;
@@ -75,5 +98,4 @@ public class MovieController {
             return values()[ordinal];
         }
     }
-
 }

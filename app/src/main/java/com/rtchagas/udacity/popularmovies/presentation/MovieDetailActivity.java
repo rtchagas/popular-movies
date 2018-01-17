@@ -2,26 +2,40 @@ package com.rtchagas.udacity.popularmovies.presentation;
 
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.NavUtils;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
 import com.rtchagas.udacity.popularmovies.R;
+import com.rtchagas.udacity.popularmovies.controller.MovieController;
+import com.rtchagas.udacity.popularmovies.controller.OnSearchResultListener;
 import com.rtchagas.udacity.popularmovies.controller.TmdbAPI;
 import com.rtchagas.udacity.popularmovies.core.Movie;
+import com.rtchagas.udacity.popularmovies.core.Trailer;
+import com.rtchagas.udacity.popularmovies.presentation.adapter.TrailerAdapter;
+import com.rtchagas.udacity.popularmovies.util.NetworkUtils;
 import com.squareup.picasso.Picasso;
 
 import java.text.SimpleDateFormat;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MovieDetailActivity extends AppCompatActivity {
+public class MovieDetailActivity extends AppCompatActivity implements OnSearchResultListener<Trailer> {
 
     protected static final String EXTRA_MOVIE = "movie";
 
@@ -49,6 +63,17 @@ public class MovieDetailActivity extends AppCompatActivity {
     @BindView(R.id.tv_movie_overview)
     TextView mTvMovieOverview;
 
+    @BindView(R.id.rv_movie_trailers)
+    RecyclerView mRvTrailers;
+
+    @BindView(R.id.pb_trailers)
+    ProgressBar mPbTrailers;
+
+    @BindView(R.id.tv_trailers_info)
+    TextView mTvTrailersInfo;
+
+    private int mCurrentMovieId;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,9 +84,15 @@ public class MovieDetailActivity extends AppCompatActivity {
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        // Get the movie from the incoming intent
         if ((getIntent().getExtras() != null) && getIntent().getExtras().containsKey(EXTRA_MOVIE)) {
+
+            // Get the movie from the incoming intent
             Movie movie = (Movie) getIntent().getSerializableExtra(EXTRA_MOVIE);
+
+            // Save the movie id for future operations
+            mCurrentMovieId = movie.getId();
+
+            // Fill the details
             fillMovieDetails(movie);
         }
         else {
@@ -106,5 +137,83 @@ public class MovieDetailActivity extends AppCompatActivity {
 
         // Movie overview
         mTvMovieOverview.setText(movie.getOverview());
+
+        // Movie trailers
+
+        TrailerAdapter trailerAdapter = new TrailerAdapter();
+        mRvTrailers.setAdapter(trailerAdapter);
+        mRvTrailers.setLayoutManager(new LinearLayoutManager(this,
+                LinearLayoutManager.HORIZONTAL, false));
+        mRvTrailers.setHasFixedSize(true);
+
+        // Set some nice item sp_divider_horizontal
+        DividerItemDecoration itemDecorator = new DividerItemDecoration(this,
+                DividerItemDecoration.HORIZONTAL);
+        itemDecorator.setDrawable(ContextCompat.getDrawable(this, R.drawable.sp_divider_horizontal));
+        mRvTrailers.addItemDecoration(itemDecorator);
+
+        // Load the trailers in the background
+        loadTrailersAsync(movie.getId());
+    }
+
+    private void setTrailersProgressView(boolean isLoading) {
+        mPbTrailers.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+    }
+
+    private void loadTrailersAsync(int movieId) {
+
+        // We need internet :)
+        if (!NetworkUtils.isInternetAvailable(this)) {
+            // Show the text view warning the user
+            setTrailersProgressView(false);
+            mTvTrailersInfo.setVisibility(View.VISIBLE);
+            mTvTrailersInfo.setText(getString(R.string.movie_trailers_offline));
+            return;
+        }
+
+        MovieController.getInstance().getTrailersAsync(movieId, this);
+
+        // Set the UI to indicate that the trailers are being loaded.
+        setTrailersProgressView(true);
+    }
+
+    @Override
+    public void onResultReady(@Nullable List<Trailer> trailerList) {
+
+        // Hide the progress bar
+        setTrailersProgressView(false);
+
+        if ((trailerList != null) && (trailerList.size() > 0)) {
+            ((TrailerAdapter) mRvTrailers.getAdapter()).setTrailers(trailerList);
+            mTvTrailersInfo.setVisibility(View.GONE);
+        }
+        else {
+            // No trailers...
+            mTvTrailersInfo.setVisibility(View.VISIBLE);
+            mTvTrailersInfo.setText(getString(R.string.movies_trailers_empty));
+        }
+    }
+
+    @Override
+    public void onResultError(@Nullable String message) {
+        // Just show a snack...
+        showTrailersTryAgainSnack(R.string.movies_trailers_loading_error);
+    }
+
+    private void showTrailersTryAgainSnack(int msgId) {
+
+        // Hide the loading progress
+        setTrailersProgressView(false);
+
+        Snackbar snackbar = Snackbar.make(findViewById(R.id.myCoordinatorLayout),
+                msgId, Snackbar.LENGTH_INDEFINITE);
+        snackbar.setAction(R.string.try_again, new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                loadTrailersAsync(mCurrentMovieId);
+            }
+        });
+
+        snackbar.show();
     }
 }
