@@ -123,9 +123,9 @@
                 style="@style/MovieSubItem"
                 android:layout_marginLeft="16dp"
                 android:layout_marginStart="16dp"
-                android:drawableLeft="@drawable/ic_videocam"
-                android:drawableStart="@drawable/ic_videocam"
-                android:text="@string/movie_trailers_tile"
+                android:drawableLeft="@drawable/ic_videocam_24dp"
+                android:drawableStart="@drawable/ic_videocam_24dp"
+                android:text="@string/movie_trailers_title"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/iv_movie_poster" />
 

@@ -10,8 +10,14 @@
     <string name="content_movie_poster">Movie poster</string>
     <string name="content_movie_backdrop">Movie backdrop</string>
     <string name="content_movie_trailer">Movie trailer</string>
-    <string name="movie_trailers_tile">Trailers:</string>
+
+    <string name="movie_trailers_title">Trailers:</string>
     <string name="movie_trailers_offline">Internet must be available to load the movie\'s trailers.</string>
     <string name="movies_trailers_loading_error">Oops! Couldn\'t load the trailers…</string>
     <string name="movies_trailers_empty">This movie has no trailer yet.</string>
+
+    <string name="movie_reviews_title">Reviews:</string>
+    <string name="movie_reviews_offline">Internet must be available to load the movie\'s reviews.</string>
+    <string name="movies_reviews_loading_error">Oops! Couldn\'t load the reviews…</string>
+    <string name="movies_reviews_empty">This movie has no review yet.</string>
 </resources>

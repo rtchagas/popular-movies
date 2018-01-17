@@ -2,9 +2,12 @@ package com.rtchagas.udacity.popularmovies.core;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class MovieSearchResult {
+public class MovieSearchResult implements Serializable {
+
+    private final static long serialVersionUID = 1428191698112835421L;
 
     @SerializedName("page")
     private int page;

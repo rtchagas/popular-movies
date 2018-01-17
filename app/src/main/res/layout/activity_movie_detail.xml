@@ -121,9 +121,9 @@
             <TextView
                 android:id="@+id/tv_trailers"
                 style="@style/MovieSubItem"
-                android:drawableLeft="@drawable/ic_videocam"
-                android:drawableStart="@drawable/ic_videocam"
-                android:text="@string/movie_trailers_tile"
+                android:drawableLeft="@drawable/ic_videocam_24dp"
+                android:drawableStart="@drawable/ic_videocam_24dp"
+                android:text="@string/movie_trailers_title"
                 app:layout_constraintStart_toStartOf="@id/tv_movie_overview"
                 app:layout_constraintTop_toBottomOf="@id/tv_movie_overview" />
 
@@ -162,6 +162,14 @@
                 app:layout_constraintStart_toStartOf="@+id/rv_movie_trailers"
                 app:layout_constraintTop_toBottomOf="@+id/rv_movie_trailers" />
 
+            <TextView
+                android:id="@+id/tv_reviews"
+                style="@style/MovieSubItem"
+                android:drawableLeft="@drawable/ic_chat_24dp"
+                android:drawableStart="@drawable/ic_chat_24dp"
+                android:text="@string/movie_reviews_title"
+                app:layout_constraintStart_toStartOf="@id/tv_movie_overview"
+                app:layout_constraintTop_toBottomOf="@id/rv_movie_trailers" />
 
         </android.support.constraint.ConstraintLayout>
 

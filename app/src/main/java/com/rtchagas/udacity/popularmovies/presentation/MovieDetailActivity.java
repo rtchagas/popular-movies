@@ -139,6 +139,17 @@ public class MovieDetailActivity extends AppCompatActivity implements OnSearchRe
         mTvMovieOverview.setText(movie.getOverview());
 
         // Movie trailers
+        initMovieTrailers(movie.getId());
+
+        // Movie reviews
+        initMovieReviews(movie.getId());
+    }
+
+    private void initMovieReviews(int movieId) {
+
+    }
+
+    private void initMovieTrailers(int movieId) {
 
         TrailerAdapter trailerAdapter = new TrailerAdapter();
         mRvTrailers.setAdapter(trailerAdapter);
@@ -153,7 +164,7 @@ public class MovieDetailActivity extends AppCompatActivity implements OnSearchRe
         mRvTrailers.addItemDecoration(itemDecorator);
 
         // Load the trailers in the background
-        loadTrailersAsync(movie.getId());
+        loadTrailersAsync(movieId);
     }
 
     private void setTrailersProgressView(boolean isLoading) {
