@@ -11,4 +11,12 @@
         <item name="android:navigationBarColor" tools:targetApi="21">@color/colorPrimary</item>
     </style>
 
+    <!-- Expanded toolbar text appearance -->
+    <style name="ToolbarExpandedTextWithShadow" parent="TextAppearance.Design.CollapsingToolbar.Expanded">
+        <item name="android:shadowColor">@color/material_black</item>
+        <item name="android:shadowDx">2</item>
+        <item name="android:shadowDy">2</item>
+        <item name="android:shadowRadius">4</item>
+    </style>
+
 </resources>

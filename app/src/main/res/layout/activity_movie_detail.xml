@@ -16,7 +16,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:contentScrim="@color/colorSecondary"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed">
+            app:layout_scrollFlags="scroll|exitUntilCollapsed"
+            app:expandedTitleTextAppearance="@style/ToolbarExpandedTextWithShadow">
 
             <ImageView
                 android:id="@+id/iv_movie_backdrop"
@@ -34,9 +35,6 @@
                 android:layout_height="?attr/actionBarSize"
                 android:elevation="4dp"
                 app:layout_collapseMode="pin"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
                 app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
                 tools:targetApi="lollipop" />
 
@@ -74,7 +72,7 @@
                 android:layout_marginLeft="32dp"
                 android:layout_marginStart="32dp"
                 android:layout_marginTop="16dp"
-                android:text="12/08/2017"
+                tools:text="12/08/2017"
                 android:textSize="28sp"
                 app:layout_constraintStart_toEndOf="@+id/iv_movie_poster"
                 app:layout_constraintTop_toTopOf="parent" />
