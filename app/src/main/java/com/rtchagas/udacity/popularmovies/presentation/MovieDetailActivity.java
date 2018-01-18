@@ -24,7 +24,9 @@ import com.rtchagas.udacity.popularmovies.controller.MovieController;
 import com.rtchagas.udacity.popularmovies.controller.OnSearchResultListener;
 import com.rtchagas.udacity.popularmovies.controller.TmdbAPI;
 import com.rtchagas.udacity.popularmovies.core.Movie;
+import com.rtchagas.udacity.popularmovies.core.Review;
 import com.rtchagas.udacity.popularmovies.core.Trailer;
+import com.rtchagas.udacity.popularmovies.presentation.adapter.ReviewAdapter;
 import com.rtchagas.udacity.popularmovies.presentation.adapter.TrailerAdapter;
 import com.rtchagas.udacity.popularmovies.util.NetworkUtils;
 import com.squareup.picasso.Picasso;
@@ -35,7 +37,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MovieDetailActivity extends AppCompatActivity implements OnSearchResultListener<Trailer> {
+public class MovieDetailActivity extends AppCompatActivity {
 
     protected static final String EXTRA_MOVIE = "movie";
 
@@ -71,6 +73,15 @@ public class MovieDetailActivity extends AppCompatActivity implements OnSearchRe
 
     @BindView(R.id.tv_trailers_info)
     TextView mTvTrailersInfo;
+
+    @BindView(R.id.rv_movie_reviews)
+    RecyclerView mRvReviews;
+
+    @BindView(R.id.pb_reviews)
+    ProgressBar mPbReviews;
+
+    @BindView(R.id.tv_reviews_info)
+    TextView mTvReviewsInfo;
 
     private int mCurrentMovieId;
 
@@ -145,10 +156,6 @@ public class MovieDetailActivity extends AppCompatActivity implements OnSearchRe
         initMovieReviews(movie.getId());
     }
 
-    private void initMovieReviews(int movieId) {
-
-    }
-
     private void initMovieTrailers(int movieId) {
 
         TrailerAdapter trailerAdapter = new TrailerAdapter();
@@ -167,10 +174,6 @@ public class MovieDetailActivity extends AppCompatActivity implements OnSearchRe
         loadTrailersAsync(movieId);
     }
 
-    private void setTrailersProgressView(boolean isLoading) {
-        mPbTrailers.setVisibility(isLoading ? View.VISIBLE : View.GONE);
-    }
-
     private void loadTrailersAsync(int movieId) {
 
         // We need internet :)
@@ -182,33 +185,36 @@ public class MovieDetailActivity extends AppCompatActivity implements OnSearchRe
             return;
         }
 
-        MovieController.getInstance().getTrailersAsync(movieId, this);
+        MovieController.getInstance().getTrailersAsync(movieId, new OnSearchResultListener<Trailer>() {
+            @Override
+            public void onResultReady(@Nullable List<Trailer> trailerList) {
+                // Hide the progress bar
+                setTrailersProgressView(false);
+
+                if ((trailerList != null) && (trailerList.size() > 0)) {
+                    ((TrailerAdapter) mRvTrailers.getAdapter()).setTrailers(trailerList);
+                    mTvTrailersInfo.setVisibility(View.GONE);
+                }
+                else {
+                    // No trailers...
+                    mTvTrailersInfo.setVisibility(View.VISIBLE);
+                    mTvTrailersInfo.setText(getString(R.string.movies_trailers_empty));
+                }
+            }
+
+            @Override
+            public void onResultError(@Nullable String message) {
+                // Just show a snack...
+                showTrailersTryAgainSnack(R.string.movies_trailers_loading_error);
+            }
+        });
 
         // Set the UI to indicate that the trailers are being loaded.
         setTrailersProgressView(true);
     }
 
-    @Override
-    public void onResultReady(@Nullable List<Trailer> trailerList) {
-
-        // Hide the progress bar
-        setTrailersProgressView(false);
-
-        if ((trailerList != null) && (trailerList.size() > 0)) {
-            ((TrailerAdapter) mRvTrailers.getAdapter()).setTrailers(trailerList);
-            mTvTrailersInfo.setVisibility(View.GONE);
-        }
-        else {
-            // No trailers...
-            mTvTrailersInfo.setVisibility(View.VISIBLE);
-            mTvTrailersInfo.setText(getString(R.string.movies_trailers_empty));
-        }
-    }
-
-    @Override
-    public void onResultError(@Nullable String message) {
-        // Just show a snack...
-        showTrailersTryAgainSnack(R.string.movies_trailers_loading_error);
+    private void setTrailersProgressView(boolean isLoading) {
+        mPbTrailers.setVisibility(isLoading ? View.VISIBLE : View.GONE);
     }
 
     private void showTrailersTryAgainSnack(int msgId) {
@@ -222,6 +228,86 @@ public class MovieDetailActivity extends AppCompatActivity implements OnSearchRe
             @Override
             public void onClick(View view) {
                 loadTrailersAsync(mCurrentMovieId);
+            }
+        });
+
+        snackbar.show();
+    }
+
+    private void initMovieReviews(int movieId) {
+
+        ReviewAdapter trailerAdapter = new ReviewAdapter();
+        mRvReviews.setAdapter(trailerAdapter);
+        mRvReviews.setLayoutManager(new LinearLayoutManager(this,
+                LinearLayoutManager.VERTICAL, false));
+        mRvReviews.setHasFixedSize(true);
+        mRvReviews.setNestedScrollingEnabled(false);
+
+
+        // Set some nice vertical divider
+        DividerItemDecoration itemDecorator = new DividerItemDecoration(this,
+                DividerItemDecoration.VERTICAL);
+        itemDecorator.setDrawable(ContextCompat.getDrawable(this, R.drawable.sp_divider_vertical));
+        mRvReviews.addItemDecoration(itemDecorator);
+
+        // Load the reviews in the background
+        loadReviewsAsync(movieId);
+    }
+
+    private void loadReviewsAsync(int movieId) {
+
+        // We need internet :)
+        if (!NetworkUtils.isInternetAvailable(this)) {
+            // Show the text view warning the user
+            setReviewsProgressView(false);
+            mTvReviewsInfo.setVisibility(View.VISIBLE);
+            mTvReviewsInfo.setText(getString(R.string.movie_reviews_offline));
+            return;
+        }
+
+        MovieController.getInstance().getReviewsAsync(movieId, new OnSearchResultListener<Review>() {
+            @Override
+            public void onResultReady(@Nullable List<Review> reviewList) {
+                // Hide the progress bar
+                setReviewsProgressView(false);
+
+                if ((reviewList != null) && (reviewList.size() > 0)) {
+                    ((ReviewAdapter) mRvReviews.getAdapter()).setReviews(reviewList);
+                    mTvReviewsInfo.setVisibility(View.GONE);
+                }
+                else {
+                    // No reviews...
+                    mTvReviewsInfo.setVisibility(View.VISIBLE);
+                    mTvReviewsInfo.setText(getString(R.string.movies_reviews_empty));
+                }
+            }
+
+            @Override
+            public void onResultError(@Nullable String message) {
+                // Just show a snack...
+                showReviewsTryAgainSnack(R.string.movies_trailers_loading_error);
+            }
+        });
+
+        // Set the UI to indicate that the trailers are being loaded.
+        setReviewsProgressView(true);
+    }
+
+    private void setReviewsProgressView(boolean isLoading) {
+        mPbReviews.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+    }
+
+    private void showReviewsTryAgainSnack(int msgId) {
+
+        // Hide the loading progress
+        setReviewsProgressView(false);
+
+        Snackbar snackbar = Snackbar.make(findViewById(R.id.myCoordinatorLayout),
+                msgId, Snackbar.LENGTH_INDEFINITE);
+        snackbar.setAction(R.string.try_again, new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                loadReviewsAsync(mCurrentMovieId);
             }
         });
 

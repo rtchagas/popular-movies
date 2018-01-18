@@ -20,4 +20,5 @@
     <string name="movie_reviews_offline">Internet must be available to load the movie\'s reviews.</string>
     <string name="movies_reviews_loading_error">Oops! Couldn\'t load the reviews…</string>
     <string name="movies_reviews_empty">This movie has no review yet.</string>
+    <string name="movies_reviews_read_more">Read more…</string>
 </resources>

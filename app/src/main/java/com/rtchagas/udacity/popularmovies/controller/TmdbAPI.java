@@ -3,6 +3,7 @@ package com.rtchagas.udacity.popularmovies.controller;
 import com.rtchagas.udacity.popularmovies.Config;
 import com.rtchagas.udacity.popularmovies.core.Movie;
 import com.rtchagas.udacity.popularmovies.core.MovieSearchResult;
+import com.rtchagas.udacity.popularmovies.core.ReviewSearchResult;
 import com.rtchagas.udacity.popularmovies.core.TrailerSearchResult;
 
 import retrofit2.Call;
@@ -29,4 +30,7 @@ public interface TmdbAPI {
 
     @GET("movie/{id}/videos?api_key=" + Config.TMDB_API_KEY)
     Call<TrailerSearchResult> getTrailers(@Path("id") int movieId);
+
+    @GET("movie/{id}/reviews?api_key=" + Config.TMDB_API_KEY)
+    Call<ReviewSearchResult> getReviews(@Path("id") int movieId);
 }

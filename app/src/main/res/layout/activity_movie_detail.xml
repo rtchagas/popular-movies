@@ -152,15 +152,15 @@
             <ProgressBar
                 android:id="@+id/pb_trailers"
                 style="@style/Base.Widget.AppCompat.ProgressBar"
-                android:layout_width="100dp"
-                android:layout_height="wrap_content"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
                 android:layout_gravity="center"
-                android:layout_marginEnd="8dp"
+                android:layout_marginLeft="8dp"
                 android:layout_marginStart="8dp"
                 android:indeterminate="true"
-                app:layout_constraintEnd_toEndOf="@+id/rv_movie_trailers"
-                app:layout_constraintStart_toStartOf="@+id/rv_movie_trailers"
-                app:layout_constraintTop_toBottomOf="@+id/rv_movie_trailers" />
+                app:layout_constraintBottom_toBottomOf="@+id/tv_trailers"
+                app:layout_constraintStart_toEndOf="@+id/tv_trailers"
+                app:layout_constraintTop_toTopOf="@+id/tv_trailers" />
 
             <TextView
                 android:id="@+id/tv_reviews"
@@ -168,8 +168,44 @@
                 android:drawableLeft="@drawable/ic_people_24dp"
                 android:drawableStart="@drawable/ic_people_24dp"
                 android:text="@string/movie_reviews_title"
-                app:layout_constraintStart_toStartOf="@id/tv_movie_overview"
+                app:layout_constraintStart_toStartOf="@id/tv_trailers"
                 app:layout_constraintTop_toBottomOf="@id/rv_movie_trailers" />
+
+            <TextView
+                android:id="@+id/tv_reviews_info"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:textStyle="italic"
+                app:layout_constraintEnd_toEndOf="@+id/rv_movie_reviews"
+                app:layout_constraintStart_toStartOf="@+id/rv_movie_reviews"
+                app:layout_constraintTop_toBottomOf="@+id/tv_reviews"
+                tools:text="Message to user when there is no reviews or internet is not available" />
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/rv_movie_reviews"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:layout_marginTop="12dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/tv_reviews"
+                app:layout_constraintTop_toBottomOf="@+id/tv_reviews_info" />
+
+            <ProgressBar
+                android:id="@+id/pb_reviews"
+                style="@style/Base.Widget.AppCompat.ProgressBar"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                android:layout_marginLeft="8dp"
+                android:layout_marginStart="8dp"
+                android:indeterminate="true"
+                app:layout_constraintBottom_toBottomOf="@+id/tv_reviews"
+                app:layout_constraintStart_toEndOf="@+id/tv_reviews"
+                app:layout_constraintTop_toTopOf="@+id/tv_reviews" />
 
         </android.support.constraint.ConstraintLayout>
 

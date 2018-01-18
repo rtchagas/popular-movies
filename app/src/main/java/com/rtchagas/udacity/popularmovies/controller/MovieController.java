@@ -6,6 +6,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.rtchagas.udacity.popularmovies.core.Movie;
 import com.rtchagas.udacity.popularmovies.core.MovieSearchResult;
+import com.rtchagas.udacity.popularmovies.core.Review;
+import com.rtchagas.udacity.popularmovies.core.ReviewSearchResult;
 import com.rtchagas.udacity.popularmovies.core.Trailer;
 import com.rtchagas.udacity.popularmovies.core.TrailerSearchResult;
 
@@ -88,6 +90,26 @@ public class MovieController {
 
         // Call the API asynchronously.
         mTmdbApi.getTrailers(movieId).enqueue(resultCallback);
+    }
+
+    public void getReviewsAsync(int movieId, @NonNull final OnSearchResultListener<Review> resultListener) {
+
+        Callback<ReviewSearchResult> resultCallback = new Callback<ReviewSearchResult>() {
+            @Override
+            public void onResponse(Call<ReviewSearchResult> call, Response<ReviewSearchResult> response) {
+                if (response.body() != null) {
+                    resultListener.onResultReady(response.body().getReviews());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ReviewSearchResult> call, Throwable t) {
+                resultListener.onResultError(t.getMessage());
+            }
+        };
+
+        // Call the API asynchronously.
+        mTmdbApi.getReviews(movieId).enqueue(resultCallback);
     }
 
     public enum MovieSort {
