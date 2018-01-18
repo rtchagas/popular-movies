@@ -10,9 +10,9 @@
         android:id="@+id/iv_movie_trailer"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:background="@drawable/img_movie_default_rotated"
         android:contentDescription="@string/content_movie_trailer"
         android:scaleType="centerInside"
-        android:src="@drawable/img_movie_default_rotated"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

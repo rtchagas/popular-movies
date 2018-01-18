@@ -127,17 +127,6 @@
                 app:layout_constraintStart_toStartOf="@id/tv_movie_overview"
                 app:layout_constraintTop_toBottomOf="@id/tv_movie_overview" />
 
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/rv_movie_trailers"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:layout_marginRight="8dp"
-                android:layout_marginTop="12dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="@+id/tv_trailers"
-                app:layout_constraintTop_toBottomOf="@+id/tv_trailers" />
-
             <TextView
                 android:id="@+id/tv_trailers_info"
                 android:layout_width="0dp"
@@ -148,6 +137,17 @@
                 app:layout_constraintStart_toStartOf="@+id/rv_movie_trailers"
                 app:layout_constraintTop_toBottomOf="@+id/tv_trailers"
                 tools:text="Message to user when there is no trailers or internet is not available" />
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/rv_movie_trailers"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
+                android:layout_marginTop="12dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/tv_trailers"
+                app:layout_constraintTop_toBottomOf="@+id/tv_trailers_info" />
 
             <ProgressBar
                 android:id="@+id/pb_trailers"
@@ -165,8 +165,8 @@
             <TextView
                 android:id="@+id/tv_reviews"
                 style="@style/MovieSubItem"
-                android:drawableLeft="@drawable/ic_chat_24dp"
-                android:drawableStart="@drawable/ic_chat_24dp"
+                android:drawableLeft="@drawable/ic_people_24dp"
+                android:drawableStart="@drawable/ic_people_24dp"
                 android:text="@string/movie_reviews_title"
                 app:layout_constraintStart_toStartOf="@id/tv_movie_overview"
                 app:layout_constraintTop_toBottomOf="@id/rv_movie_trailers" />

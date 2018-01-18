@@ -10,7 +10,6 @@
         android:layout_height="match_parent"
         android:adjustViewBounds="true"
         android:contentDescription="@string/content_movie_poster"
-        android:scaleType="centerCrop"
-        android:src="@drawable/img_movie_default" />
+        android:scaleType="centerCrop" />
 
 </FrameLayout>
