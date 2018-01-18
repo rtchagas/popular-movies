@@ -94,17 +94,6 @@
                 app:layout_constraintStart_toStartOf="@+id/tv_movie_release_year"
                 app:layout_constraintTop_toBottomOf="@+id/tv_movie_release_year" />
 
-            <TextView
-                android:id="@+id/tv_movie_overview"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="32dp"
-                android:layout_marginRight="32dp"
-                android:layout_marginTop="16dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/tv_movie_release_year"
-                app:layout_constraintTop_toTopOf="parent" />
-
             <RatingBar
                 android:id="@+id/rb_movie_rating"
                 style="@style/Widget.AppCompat.RatingBar.Small"
@@ -117,6 +106,30 @@
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintStart_toStartOf="@+id/tv_movie_release_year"
                 app:layout_constraintTop_toBottomOf="@+id/tv_movie_rating" />
+
+            <Button
+                android:id="@+id/bt_favorite"
+                style="@style/Widget.AppCompat.Button.Colored"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:drawableLeft="@drawable/ic_favorite_24dp"
+                android:drawableStart="@drawable/ic_favorite_24dp"
+                android:text="@string/movie_detail_add_favorite"
+                android:textSize="12sp"
+                app:layout_constraintStart_toStartOf="@+id/rb_movie_rating"
+                app:layout_constraintTop_toBottomOf="@+id/rb_movie_rating" />
+
+            <TextView
+                android:id="@+id/tv_movie_overview"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="32dp"
+                android:layout_marginRight="32dp"
+                android:layout_marginTop="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/bt_favorite"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
                 android:id="@+id/tv_trailers"

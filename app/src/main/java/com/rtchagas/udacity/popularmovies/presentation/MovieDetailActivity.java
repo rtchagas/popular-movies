@@ -1,6 +1,7 @@
 package com.rtchagas.udacity.popularmovies.presentation;
 
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CollapsingToolbarLayout;
@@ -14,6 +15,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RatingBar;
@@ -83,6 +85,9 @@ public class MovieDetailActivity extends AppCompatActivity {
     @BindView(R.id.tv_reviews_info)
     TextView mTvReviewsInfo;
 
+    @BindView(R.id.bt_favorite)
+    Button mBtFavorite;
+
     private int mCurrentMovieId;
 
     @Override
@@ -126,6 +131,8 @@ public class MovieDetailActivity extends AppCompatActivity {
 
     private void fillMovieDetails(Movie movie) {
 
+        int movieId = movie.getId();
+
         // Set movie backdrop
         String imgUrl = TmdbAPI.BASE_IMG_BACKDROP_URL + movie.getBackdropPath();
         Picasso.with(this).load(Uri.parse(imgUrl)).into(mIvMovieBackdrop);
@@ -149,11 +156,81 @@ public class MovieDetailActivity extends AppCompatActivity {
         // Movie overview
         mTvMovieOverview.setText(movie.getOverview());
 
+        // Favorite
+        initFavoriteButton(movieId);
+
         // Movie trailers
-        initMovieTrailers(movie.getId());
+        initMovieTrailers(movieId);
 
         // Movie reviews
-        initMovieReviews(movie.getId());
+        initMovieReviews(movieId);
+    }
+
+    private void initFavoriteButton(final int movieId) {
+
+        if (!isMovieFavorite(movieId)) {
+            updateFavoriteButton(false);
+            mBtFavorite.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    addMovieToFavorites(movieId);
+                    showFavoritesSnack(true, movieId);
+                }
+            });
+        }
+        else {
+            updateFavoriteButton(true);
+            mBtFavorite.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    delMovieFromFavorites(movieId);
+                    showFavoritesSnack(false, movieId);
+                }
+            });
+        }
+    }
+
+    private void showFavoritesSnack(boolean isFavorite, final int movieId) {
+
+        int msgId = (isFavorite ? R.string.movie_detail_add_favorite_success
+                : R.string.movie_detail_del_favorite_success);
+
+        Snackbar snackbar = Snackbar.make(findViewById(R.id.myCoordinatorLayout),
+                msgId, Snackbar.LENGTH_LONG);
+        snackbar.setAction(R.string.undo, new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // TODO: Implement add or remove methods
+            }
+        });
+
+        snackbar.show();
+    }
+
+    private void addMovieToFavorites(int movieId) {
+
+    }
+
+    private void delMovieFromFavorites(int movieId) {
+
+    }
+
+    private void updateFavoriteButton(boolean isFavorite) {
+
+        int textId = (isFavorite ? R.string.movie_detail_is_favorite
+                : R.string.movie_detail_add_favorite);
+        int drawableId = (isFavorite ? R.drawable.ic_favorite_dark_24dp
+                : R.drawable.ic_favorite_24dp);
+
+        mBtFavorite.setText(textId);
+        mBtFavorite.setCompoundDrawablesWithIntrinsicBounds(drawableId, 0, 0, 0);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            mBtFavorite.setCompoundDrawablesRelativeWithIntrinsicBounds(drawableId, 0, 0, 0);
+        }
+    }
+
+    private boolean isMovieFavorite(int movieId) {
+        return false;
     }
 
     private void initMovieTrailers(int movieId) {
