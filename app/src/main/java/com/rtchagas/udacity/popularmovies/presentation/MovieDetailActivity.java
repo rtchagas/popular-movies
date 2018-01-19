@@ -88,6 +88,9 @@ public class MovieDetailActivity extends AppCompatActivity {
     @BindView(R.id.bt_favorite)
     Button mBtFavorite;
 
+    /**
+     * The external (TMDB) id of the current movie being displayed.
+     */
     private int mCurrentMovieId;
 
     @Override
@@ -104,9 +107,6 @@ public class MovieDetailActivity extends AppCompatActivity {
 
             // Get the movie from the incoming intent
             Movie movie = (Movie) getIntent().getSerializableExtra(EXTRA_MOVIE);
-
-            // Save the movie id for future operations
-            mCurrentMovieId = movie.getId();
 
             // Fill the details
             fillMovieDetails(movie);
@@ -131,7 +131,8 @@ public class MovieDetailActivity extends AppCompatActivity {
 
     private void fillMovieDetails(Movie movie) {
 
-        int movieId = movie.getId();
+        // Save the movie id for future operations
+        mCurrentMovieId = movie.getId();
 
         // Set movie backdrop
         String imgUrl = TmdbAPI.BASE_IMG_BACKDROP_URL + movie.getBackdropPath();
@@ -157,24 +158,24 @@ public class MovieDetailActivity extends AppCompatActivity {
         mTvMovieOverview.setText(movie.getOverview());
 
         // Favorite
-        initFavoriteButton(movieId);
+        initFavoriteButton();
 
         // Movie trailers
-        initMovieTrailers(movieId);
+        initMovieTrailers();
 
         // Movie reviews
-        initMovieReviews(movieId);
+        initMovieReviews();
     }
 
-    private void initFavoriteButton(final int movieId) {
+    private void initFavoriteButton() {
 
-        if (!isMovieFavorite(movieId)) {
+        if (!isMovieFavorite()) {
             updateFavoriteButton(false);
             mBtFavorite.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    addMovieToFavorites(movieId);
-                    showFavoritesSnack(true, movieId);
+                    addMovieToFavorites();
+                    showFavoritesSnack(true);
                 }
             });
         }
@@ -183,14 +184,14 @@ public class MovieDetailActivity extends AppCompatActivity {
             mBtFavorite.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    delMovieFromFavorites(movieId);
-                    showFavoritesSnack(false, movieId);
+                    delMovieFromFavorites();
+                    showFavoritesSnack(false);
                 }
             });
         }
     }
 
-    private void showFavoritesSnack(boolean isFavorite, final int movieId) {
+    private void showFavoritesSnack(final boolean isFavorite) {
 
         int msgId = (isFavorite ? R.string.movie_detail_add_favorite_success
                 : R.string.movie_detail_del_favorite_success);
@@ -200,18 +201,23 @@ public class MovieDetailActivity extends AppCompatActivity {
         snackbar.setAction(R.string.undo, new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // TODO: Implement add or remove methods
+                if (isFavorite) {
+                    delMovieFromFavorites();
+                }
+                else {
+                    addMovieToFavorites();
+                }
             }
         });
 
         snackbar.show();
     }
 
-    private void addMovieToFavorites(int movieId) {
+    private void addMovieToFavorites() {
 
     }
 
-    private void delMovieFromFavorites(int movieId) {
+    private void delMovieFromFavorites() {
 
     }
 
@@ -229,11 +235,11 @@ public class MovieDetailActivity extends AppCompatActivity {
         }
     }
 
-    private boolean isMovieFavorite(int movieId) {
+    private boolean isMovieFavorite() {
         return false;
     }
 
-    private void initMovieTrailers(int movieId) {
+    private void initMovieTrailers() {
 
         TrailerAdapter trailerAdapter = new TrailerAdapter();
         mRvTrailers.setAdapter(trailerAdapter);
@@ -248,10 +254,10 @@ public class MovieDetailActivity extends AppCompatActivity {
         mRvTrailers.addItemDecoration(itemDecorator);
 
         // Load the trailers in the background
-        loadTrailersAsync(movieId);
+        loadTrailersAsync();
     }
 
-    private void loadTrailersAsync(int movieId) {
+    private void loadTrailersAsync() {
 
         // We need internet :)
         if (!NetworkUtils.isInternetAvailable(this)) {
@@ -262,7 +268,7 @@ public class MovieDetailActivity extends AppCompatActivity {
             return;
         }
 
-        MovieController.getInstance().getTrailersAsync(movieId, new OnSearchResultListener<Trailer>() {
+        MovieController.getInstance().getTrailersAsync(mCurrentMovieId, new OnSearchResultListener<Trailer>() {
             @Override
             public void onResultReady(@Nullable List<Trailer> trailerList) {
                 // Hide the progress bar
@@ -304,14 +310,14 @@ public class MovieDetailActivity extends AppCompatActivity {
         snackbar.setAction(R.string.try_again, new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                loadTrailersAsync(mCurrentMovieId);
+                loadTrailersAsync();
             }
         });
 
         snackbar.show();
     }
 
-    private void initMovieReviews(int movieId) {
+    private void initMovieReviews() {
 
         ReviewAdapter trailerAdapter = new ReviewAdapter();
         mRvReviews.setAdapter(trailerAdapter);
@@ -328,10 +334,10 @@ public class MovieDetailActivity extends AppCompatActivity {
         mRvReviews.addItemDecoration(itemDecorator);
 
         // Load the reviews in the background
-        loadReviewsAsync(movieId);
+        loadReviewsAsync();
     }
 
-    private void loadReviewsAsync(int movieId) {
+    private void loadReviewsAsync() {
 
         // We need internet :)
         if (!NetworkUtils.isInternetAvailable(this)) {
@@ -342,7 +348,7 @@ public class MovieDetailActivity extends AppCompatActivity {
             return;
         }
 
-        MovieController.getInstance().getReviewsAsync(movieId, new OnSearchResultListener<Review>() {
+        MovieController.getInstance().getReviewsAsync(mCurrentMovieId, new OnSearchResultListener<Review>() {
             @Override
             public void onResultReady(@Nullable List<Review> reviewList) {
                 // Hide the progress bar
@@ -384,7 +390,7 @@ public class MovieDetailActivity extends AppCompatActivity {
         snackbar.setAction(R.string.try_again, new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                loadReviewsAsync(mCurrentMovieId);
+                loadReviewsAsync();
             }
         });
 
