@@ -24,6 +24,13 @@
             android:name=".presentation.MovieDetailActivity"
             android:label="@string/movie_detail"
             android:parentActivityName=".presentation.MoviesListActivity" />
+
+        <!-- Providers -->
+        <provider
+            android:name=".provider.MoviesProvider"
+            android:authorities="${applicationId}"
+            android:exported="false" />
+
     </application>
 
 </manifest>

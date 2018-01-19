@@ -2,7 +2,7 @@
     <string name="app_name">Popular Movies</string>
     <string name="try_again">Try again</string>
     <string name="undo">Undo</string>
-    <string name="no_internet">Oops! Internet isn\'t available.</string>
+    <string name="no_internet">Oops! Internet isn\'t available</string>
     <string name="movies_loading_error">Oops! Couldn\'t load the movies…</string>
     <string name="menu_movies_list_popular">Most Popular</string>
     <string name="menu_movies_list_rating">Top Rated</string>
@@ -11,8 +11,8 @@
 
     <string name="movie_detail_add_favorite">Add favorite</string>
     <string name="movie_detail_is_favorite">My favorite</string>
-    <string name="movie_detail_add_favorite_success">Added to your favorites.</string>
-    <string name="movie_detail_del_favorite_success">Removed from your favorites.</string>
+    <string name="movie_detail_add_favorite_success">Added to your favorites</string>
+    <string name="movie_detail_del_favorite_success">Removed from your favorites</string>
 
     <string name="content_movie_poster">Movie poster</string>
     <string name="content_movie_backdrop">Movie backdrop</string>
@@ -27,5 +27,5 @@
     <string name="movie_reviews_offline">Internet must be available to load the movie\'s reviews.</string>
     <string name="movies_reviews_loading_error">Oops! Couldn\'t load the reviews…</string>
     <string name="movies_reviews_empty">This movie has no review yet.</string>
-    <string name="movies_reviews_read_more">Read more…</string>
+    <string name="movies_reviews_read_more">Read more</string>
 </resources>
