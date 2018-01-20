@@ -10,4 +10,8 @@
         android:id="@+id/menu_movies_list_item_rating"
         android:title="@string/menu_movies_list_rating"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/menu_movies_list_item_favorites"
+        android:title="@string/menu_movies_list_favorites"
+        app:showAsAction="never" />
 </menu>

@@ -13,6 +13,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.rtchagas.udacity.popularmovies.R;
 import com.rtchagas.udacity.popularmovies.controller.MovieController;
@@ -41,6 +42,9 @@ public class MoviesListActivity extends AppCompatActivity implements OnSearchRes
 
     @BindView(R.id.rv_movies)
     RecyclerView mMovieRecyclerView;
+
+    @BindView(R.id.tv_no_movies)
+    TextView mTvNoMovies;
 
     private List<Movie> mMovieList = null;
     private MovieAdapter mAdapter = null;
@@ -80,7 +84,6 @@ public class MoviesListActivity extends AppCompatActivity implements OnSearchRes
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        super.onCreateOptionsMenu(menu);
         getMenuInflater().inflate(R.menu.menu_movies_list, menu);
         return true;
     }
@@ -94,6 +97,9 @@ public class MoviesListActivity extends AppCompatActivity implements OnSearchRes
                 return true;
             case R.id.menu_movies_list_item_rating:
                 loadMoviesAsync(MovieSort.TOP_RATED);
+                return true;
+            case R.id.menu_movies_list_item_favorites:
+                loadMoviesAsync(MovieSort.FAVORITES);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -111,7 +117,8 @@ public class MoviesListActivity extends AppCompatActivity implements OnSearchRes
     private void loadMoviesAsync(MovieSort newOrder, boolean force) {
 
         // We need internet :)
-        if (!NetworkUtils.isInternetAvailable(this)) {
+        if ((MovieSort.FAVORITES != mCurrentSortOrder)
+                && !NetworkUtils.isInternetAvailable(this)) {
             showTryAgainSnack(R.string.no_internet);
             return;
         }
@@ -121,6 +128,9 @@ public class MoviesListActivity extends AppCompatActivity implements OnSearchRes
             return;
         }
 
+        // Set the UI to indicate that the movies are being loaded.
+        setProgressView(true);
+
         mCurrentSortOrder = newOrder;
         // Save this order to preferences
         PreferenceManager.getDefaultSharedPreferences(this).edit()
@@ -128,10 +138,7 @@ public class MoviesListActivity extends AppCompatActivity implements OnSearchRes
                 .apply();
 
         MovieController.getInstance()
-                .loadMoviesAsync(mCurrentSortOrder, this);
-
-        // Set the UI to indicate that the movies are being loaded.
-        setProgressView(true);
+                .loadMoviesAsync(this, mCurrentSortOrder, this);
     }
 
     private void loadMoviesAsync(MovieSort newOrder) {
@@ -150,6 +157,8 @@ public class MoviesListActivity extends AppCompatActivity implements OnSearchRes
 
             // Hide the loading progress
             setProgressView(false);
+            // Hide/show the empty view
+            setEmptyView(!(movieList.size() > 0));
 
             // Fill the adapter
             mAdapter.setMovies(movieList);
@@ -161,7 +170,7 @@ public class MoviesListActivity extends AppCompatActivity implements OnSearchRes
      */
     @Override
     public void onResultError(@Nullable String message) {
-        // Just show a snack..
+        // Just show a snack...
         showTryAgainSnack(R.string.movies_loading_error);
     }
 
@@ -187,8 +196,10 @@ public class MoviesListActivity extends AppCompatActivity implements OnSearchRes
 
     private void setProgressView(boolean isLoading) {
         mProgressBar.setVisibility((isLoading ? View.VISIBLE : View.GONE));
-        // Looked better to keep the recyclerview visible while loading other results...
-        //mMovieRecyclerView.setVisibility((isLoading ? View.GONE : View.VISIBLE));
+    }
+
+    private void setEmptyView(boolean isEmpty) {
+        mTvNoMovies.setVisibility((isEmpty ? View.VISIBLE : View.GONE));
     }
 
     private void showTryAgainSnack(int msgId) {

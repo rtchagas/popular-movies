@@ -4,13 +4,15 @@
     <string name="undo">Undo</string>
     <string name="no_internet">Oops! Internet isn\'t available</string>
     <string name="movies_loading_error">Oops! Couldn\'t load the movies…</string>
+    <string name="movies_no_movies">Oops! No movies here yet…</string>
     <string name="menu_movies_list_popular">Most Popular</string>
     <string name="menu_movies_list_rating">Top Rated</string>
+    <string name="menu_movies_list_favorites">Favorites</string>
     <string name="movie_detail">Movie Details</string>
     <string name="movie_detail_rating">%.1f/10</string>
 
     <string name="movie_detail_add_favorite">Add favorite</string>
-    <string name="movie_detail_is_favorite">My favorite</string>
+    <string name="movie_detail_is_favorite">Unfavorite</string>
     <string name="movie_detail_add_favorite_success">Added to your favorites</string>
     <string name="movie_detail_del_favorite_success">Removed from your favorites</string>
 

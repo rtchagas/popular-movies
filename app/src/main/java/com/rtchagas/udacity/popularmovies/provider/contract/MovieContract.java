@@ -39,9 +39,10 @@ public final class MovieContract {
         public static final String TITLE = "title";
         public static final String ORIGINAL_TITLE = "original_title";
         public static final String RELEASE_DATE = "release_date";
+        public static final String VOTE_AVERAGE = "vote_average";
         public static final String POSTER_PATH = "poster_path";
-        public static final String BACKDROP_PATH = "poster_path";
-        public static final String OVERVIEW = "difficulty";
+        public static final String BACKDROP_PATH = "backdrop_path";
+        public static final String OVERVIEW = "overview";
 
         /**
          * Database creation statement
@@ -52,6 +53,7 @@ public final class MovieContract {
                 + TITLE + " TEXT NOT NULL,"
                 + ORIGINAL_TITLE + " TEXT NOT NULL,"
                 + RELEASE_DATE + " INTEGER NOT NULL,"
+                + VOTE_AVERAGE + " DOUBLE NOT NULL,"
                 + POSTER_PATH + " TEXT NOT NULL,"
                 + BACKDROP_PATH + " TEXT NOT NULL,"
                 + OVERVIEW + " TEXT NOT NULL);";

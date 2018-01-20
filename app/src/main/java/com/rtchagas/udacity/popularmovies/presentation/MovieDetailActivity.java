@@ -89,9 +89,9 @@ public class MovieDetailActivity extends AppCompatActivity {
     Button mBtFavorite;
 
     /**
-     * The external (TMDB) id of the current movie being displayed.
+     * The current movie being displayed.
      */
-    private int mCurrentMovieId;
+    private Movie mCurrentMovie = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,11 +105,11 @@ public class MovieDetailActivity extends AppCompatActivity {
 
         if ((getIntent().getExtras() != null) && getIntent().getExtras().containsKey(EXTRA_MOVIE)) {
 
-            // Get the movie from the incoming intent
-            Movie movie = (Movie) getIntent().getSerializableExtra(EXTRA_MOVIE);
+            // Get the movie from the incoming intent and store it for future access.
+            mCurrentMovie = (Movie) getIntent().getSerializableExtra(EXTRA_MOVIE);
 
             // Fill the details
-            fillMovieDetails(movie);
+            fillMovieDetails(mCurrentMovie);
         }
         else {
             // Wrong intent..
@@ -130,9 +130,6 @@ public class MovieDetailActivity extends AppCompatActivity {
     }
 
     private void fillMovieDetails(Movie movie) {
-
-        // Save the movie id for future operations
-        mCurrentMovieId = movie.getId();
 
         // Set movie backdrop
         String imgUrl = TmdbAPI.BASE_IMG_BACKDROP_URL + movie.getBackdropPath();
@@ -170,24 +167,10 @@ public class MovieDetailActivity extends AppCompatActivity {
     private void initFavoriteButton() {
 
         if (!isMovieFavorite()) {
-            updateFavoriteButton(false);
-            mBtFavorite.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    addMovieToFavorites();
-                    showFavoritesSnack(true);
-                }
-            });
+            updateFavoriteButtonState(false);
         }
         else {
-            updateFavoriteButton(true);
-            mBtFavorite.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    delMovieFromFavorites();
-                    showFavoritesSnack(false);
-                }
-            });
+            updateFavoriteButtonState(true);
         }
     }
 
@@ -198,14 +181,15 @@ public class MovieDetailActivity extends AppCompatActivity {
 
         Snackbar snackbar = Snackbar.make(findViewById(R.id.myCoordinatorLayout),
                 msgId, Snackbar.LENGTH_LONG);
+
         snackbar.setAction(R.string.undo, new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (isFavorite) {
-                    delMovieFromFavorites();
+                    delMovieFromFavorites(false);
                 }
                 else {
-                    addMovieToFavorites();
+                    addMovieToFavorites(false);
                 }
             }
         });
@@ -213,15 +197,34 @@ public class MovieDetailActivity extends AppCompatActivity {
         snackbar.show();
     }
 
-    private void addMovieToFavorites() {
+    private void addMovieToFavorites(boolean showSnack) {
 
+        boolean success = (MovieController.getInstance()
+                .addFavoriteMovie(this, mCurrentMovie) != null);
+
+        if (success) {
+            updateFavoriteButtonState(true);
+            if (showSnack) {
+                showFavoritesSnack(true);
+            }
+        }
+        //TODO: Maybe add a snack for this error...
     }
 
-    private void delMovieFromFavorites() {
+    private void delMovieFromFavorites(boolean showSnackOnSuccess) {
+        boolean success = MovieController.getInstance()
+                .removeFavoriteMovie(this, mCurrentMovie.getId());
 
+        if (success) {
+            updateFavoriteButtonState(false);
+            if (showSnackOnSuccess) {
+                showFavoritesSnack(false);
+            }
+        }
+        //TODO: Maybe add a snack for this error...
     }
 
-    private void updateFavoriteButton(boolean isFavorite) {
+    private void updateFavoriteButtonState(boolean isFavorite) {
 
         int textId = (isFavorite ? R.string.movie_detail_is_favorite
                 : R.string.movie_detail_add_favorite);
@@ -233,10 +236,28 @@ public class MovieDetailActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
             mBtFavorite.setCompoundDrawablesRelativeWithIntrinsicBounds(drawableId, 0, 0, 0);
         }
+
+        if (!isFavorite) {
+            mBtFavorite.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    addMovieToFavorites(true);
+                }
+            });
+        }
+        else {
+            mBtFavorite.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    delMovieFromFavorites(true);
+                }
+            });
+        }
     }
 
     private boolean isMovieFavorite() {
-        return false;
+        return MovieController.getInstance()
+                .isFavoriteMovie(this, mCurrentMovie.getId());
     }
 
     private void initMovieTrailers() {
@@ -268,7 +289,9 @@ public class MovieDetailActivity extends AppCompatActivity {
             return;
         }
 
-        MovieController.getInstance().getTrailersAsync(mCurrentMovieId, new OnSearchResultListener<Trailer>() {
+        int movieId = mCurrentMovie.getId();
+
+        MovieController.getInstance().getTrailersAsync(movieId, new OnSearchResultListener<Trailer>() {
             @Override
             public void onResultReady(@Nullable List<Trailer> trailerList) {
                 // Hide the progress bar
@@ -348,7 +371,9 @@ public class MovieDetailActivity extends AppCompatActivity {
             return;
         }
 
-        MovieController.getInstance().getReviewsAsync(mCurrentMovieId, new OnSearchResultListener<Review>() {
+        int movieId = mCurrentMovie.getId();
+
+        MovieController.getInstance().getReviewsAsync(movieId, new OnSearchResultListener<Review>() {
             @Override
             public void onResultReady(@Nullable List<Review> reviewList) {
                 // Hide the progress bar
