@@ -2,6 +2,8 @@ package com.rtchagas.udacity.popularmovies.presentation.adapter;
 
 import android.content.Context;
 import android.net.Uri;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,25 +15,24 @@ import com.rtchagas.udacity.popularmovies.controller.TmdbAPI;
 import com.rtchagas.udacity.popularmovies.core.Movie;
 import com.squareup.picasso.Picasso;
 
-import java.util.List;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public final class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHolder> {
-
-    private List<Movie> mMoviesList = null;
+public abstract class MovieBaseAdapter extends RecyclerView.Adapter<MovieBaseAdapter.MovieViewHolder> {
 
     private View.OnClickListener mItemClickListener = null;
 
-    public MovieAdapter(View.OnClickListener itemClickListener) {
+    MovieBaseAdapter(View.OnClickListener itemClickListener) {
         mItemClickListener = itemClickListener;
     }
 
-    public void setMovies(List<Movie> movieList) {
-        mMoviesList = movieList;
-        notifyDataSetChanged();
-    }
+    @NonNull
+    public abstract Movie getMovie(int position);
+
+    public abstract void swapData(@Nullable Object newData);
+
+    @Nullable
+    public abstract Object getData();
 
     @Override
     public MovieViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -54,7 +55,7 @@ public final class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieV
         // Get context from any view inside view holder
         Context context = holder.itemView.getContext();
 
-        Movie movie = mMoviesList.get(position);
+        Movie movie = getMovie(position);
 
         // Prepare the poster URL to be loaded
         String imgUrl = TmdbAPI.BASE_IMG_THUMB_URL + movie.getPosterPath();
@@ -64,11 +65,6 @@ public final class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieV
 
         // Dynamically add the content description to make easy for accessibility.
         holder.ivPoster.setContentDescription(movie.getTitle());
-    }
-
-    @Override
-    public int getItemCount() {
-        return (mMoviesList != null ? mMoviesList.size() : 0);
     }
 
     class MovieViewHolder extends RecyclerView.ViewHolder {

@@ -1,10 +1,13 @@
 package com.rtchagas.udacity.popularmovies.presentation;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -20,7 +23,9 @@ import com.rtchagas.udacity.popularmovies.controller.MovieController;
 import com.rtchagas.udacity.popularmovies.controller.MovieController.MovieSort;
 import com.rtchagas.udacity.popularmovies.controller.OnSearchResultListener;
 import com.rtchagas.udacity.popularmovies.core.Movie;
-import com.rtchagas.udacity.popularmovies.presentation.adapter.MovieAdapter;
+import com.rtchagas.udacity.popularmovies.presentation.adapter.MovieBaseAdapter;
+import com.rtchagas.udacity.popularmovies.presentation.adapter.MovieCursorAdapter;
+import com.rtchagas.udacity.popularmovies.presentation.adapter.MovieListAdapter;
 import com.rtchagas.udacity.popularmovies.util.NetworkUtils;
 
 import java.util.ArrayList;
@@ -29,10 +34,13 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MoviesListActivity extends AppCompatActivity implements OnSearchResultListener<Movie>, View.OnClickListener {
+public class MoviesListActivity extends AppCompatActivity implements OnSearchResultListener<Movie>,
+        View.OnClickListener, LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final String STATE_KEY_MOVIE_LIST = "movie_list";
     private static final String PREF_KEY_SORT_ORDER = "sort_order";
+
+    private static final int ID_FAVORITES_LOADER = 100;
 
     @BindView(R.id.toolbar)
     Toolbar mToolbar;
@@ -46,8 +54,8 @@ public class MoviesListActivity extends AppCompatActivity implements OnSearchRes
     @BindView(R.id.tv_no_movies)
     TextView mTvNoMovies;
 
-    private List<Movie> mMovieList = null;
-    private MovieAdapter mAdapter = null;
+    private MovieListAdapter mMovieListAdapter = null;
+    private MovieCursorAdapter mMovieCursorAdapter = null;
 
     private MovieSort mCurrentSortOrder = null;
 
@@ -59,10 +67,10 @@ public class MoviesListActivity extends AppCompatActivity implements OnSearchRes
         ButterKnife.bind(this);
         setSupportActionBar(mToolbar);
 
-        mAdapter = new MovieAdapter(this);
+        mMovieListAdapter = new MovieListAdapter(this);
+        mMovieCursorAdapter = new MovieCursorAdapter(this);
 
-        // Configure the Recycler View
-        mMovieRecyclerView.setAdapter(mAdapter);
+        // Configure the RecyclerView
         mMovieRecyclerView.setLayoutManager(new GridLayoutManager(this,
                 getResources().getInteger(R.integer.movies_list_columns)));
         mMovieRecyclerView.setHasFixedSize(true);
@@ -72,14 +80,22 @@ public class MoviesListActivity extends AppCompatActivity implements OnSearchRes
                 .getInt(PREF_KEY_SORT_ORDER, MovieSort.POPULARITY.ordinal());
         mCurrentSortOrder = MovieSort.from(sortValue);
 
-        if (savedInstanceState != null) {
-            // Restore the current movies list.
+        // Restore the current movies list, if available
+        if ((savedInstanceState != null) && savedInstanceState.containsKey(STATE_KEY_MOVIE_LIST)) {
             onResultReady((ArrayList<Movie>) savedInstanceState
                     .getSerializable(STATE_KEY_MOVIE_LIST));
         }
+        // Load movies locally
+        else if (MovieSort.FAVORITES == mCurrentSortOrder) {
+            initFavoriteMovies();
+        }
+        // Load movies from cloud
         else {
             loadMoviesAsync(mCurrentSortOrder, true);
         }
+
+        // Init the favorites loader
+        getSupportLoaderManager().initLoader(ID_FAVORITES_LOADER, null, this);
     }
 
     @Override
@@ -99,19 +115,32 @@ public class MoviesListActivity extends AppCompatActivity implements OnSearchRes
                 loadMoviesAsync(MovieSort.TOP_RATED);
                 return true;
             case R.id.menu_movies_list_item_favorites:
-                loadMoviesAsync(MovieSort.FAVORITES);
+                initFavoriteMovies();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        if (mMovieList != null) {
-            outState.putSerializable(STATE_KEY_MOVIE_LIST, new ArrayList<>(mMovieList));
+        // If movies came from cloud, lets store them to make things easier to the user.
+        if ((MovieSort.FAVORITES != mCurrentSortOrder)
+                && (mMovieListAdapter != null) && (mMovieListAdapter.getData() != null)) {
+            List<Movie> movieList = (List<Movie>) mMovieListAdapter.getData();
+            outState.putSerializable(STATE_KEY_MOVIE_LIST, new ArrayList<>(movieList));
         }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // Save the current sort order to preferences
+        PreferenceManager.getDefaultSharedPreferences(this).edit()
+                .putInt(PREF_KEY_SORT_ORDER, mCurrentSortOrder.ordinal())
+                .apply();
     }
 
     private void loadMoviesAsync(MovieSort newOrder, boolean force) {
@@ -132,13 +161,9 @@ public class MoviesListActivity extends AppCompatActivity implements OnSearchRes
         setProgressView(true);
 
         mCurrentSortOrder = newOrder;
-        // Save this order to preferences
-        PreferenceManager.getDefaultSharedPreferences(this).edit()
-                .putInt(PREF_KEY_SORT_ORDER, mCurrentSortOrder.ordinal())
-                .apply();
 
         MovieController.getInstance()
-                .loadMoviesAsync(this, mCurrentSortOrder, this);
+                .loadMoviesAsync(mCurrentSortOrder, this);
     }
 
     private void loadMoviesAsync(MovieSort newOrder) {
@@ -151,17 +176,16 @@ public class MoviesListActivity extends AppCompatActivity implements OnSearchRes
     @Override
     public void onResultReady(@Nullable List<Movie> movieList) {
 
+        // Set the correct adapter to the recycler view
+        mMovieRecyclerView.setAdapter(mMovieListAdapter);
+
         if (movieList != null) {
-
-            mMovieList = movieList;
-
             // Hide the loading progress
             setProgressView(false);
             // Hide/show the empty view
             setEmptyView(!(movieList.size() > 0));
-
             // Fill the adapter
-            mAdapter.setMovies(movieList);
+            mMovieListAdapter.swapData(movieList);
         }
     }
 
@@ -184,7 +208,7 @@ public class MoviesListActivity extends AppCompatActivity implements OnSearchRes
         int position = (int) v.getTag();
 
         // Get the target movie
-        Movie movie = mMovieList.get(position);
+        Movie movie = ((MovieBaseAdapter) mMovieRecyclerView.getAdapter()).getMovie(position);
 
         // Send it to detail activity as extra
         Intent detailIntent = new Intent(this, MovieDetailActivity.class);
@@ -217,5 +241,47 @@ public class MoviesListActivity extends AppCompatActivity implements OnSearchRes
         });
 
         snackbar.show();
+    }
+
+    private void initFavoriteMovies() {
+
+        // Set Favorites as new sort order
+        mCurrentSortOrder = MovieSort.FAVORITES;
+
+        // Set the correct adapter to the recycler view
+        mMovieRecyclerView.setAdapter(mMovieCursorAdapter);
+
+        // Hide/show the empty view
+        setEmptyView(!(mMovieCursorAdapter.getItemCount() > 0));
+    }
+
+    // Cursor Loader callbacks implementation
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int loaderId, Bundle args) {
+        switch (loaderId) {
+            case ID_FAVORITES_LOADER:
+                return MovieController.getInstance().getFavoritesLoader(this);
+            default:
+                throw new RuntimeException("Loader Not Implemented: " + loaderId);
+        }
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        mMovieCursorAdapter.swapData(data);
+
+        // Update the UI only if in favorites view.
+        if (MovieSort.FAVORITES == mCurrentSortOrder) {
+            // Hide the loading progress
+            setProgressView(false);
+            // Hide/show the empty view
+            setEmptyView(!(data.getCount() > 0));
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        mMovieCursorAdapter.swapData(null);
     }
 }
