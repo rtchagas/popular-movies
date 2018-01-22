@@ -1,5 +1,6 @@
 package com.rtchagas.udacity.popularmovies.presentation;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -13,6 +14,7 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -21,6 +23,7 @@ import android.widget.ProgressBar;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
+import com.rtchagas.udacity.popularmovies.Config;
 import com.rtchagas.udacity.popularmovies.R;
 import com.rtchagas.udacity.popularmovies.controller.MovieController;
 import com.rtchagas.udacity.popularmovies.controller.OnSearchResultListener;
@@ -93,6 +96,11 @@ public class MovieDetailActivity extends AppCompatActivity {
      */
     private Movie mCurrentMovie = null;
 
+    /**
+     * The movie's first trailer (if available).
+     */
+    private Trailer mFirstTrailer = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -118,15 +126,46 @@ public class MovieDetailActivity extends AppCompatActivity {
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        getMenuInflater().inflate(R.menu.menu_movie_detail, menu);
+
+        return true;
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        // Back button just finishes this activity
+        // Back/home button just finishes this activity
         if (android.R.id.home == item.getItemId()) {
             NavUtils.navigateUpFromSameTask(this);
             return true;
         }
 
+        // Share action
+        if (R.id.menu_item_share == item.getItemId()) {
+            Intent shareIntent = getTrailerShareIntent();
+            if (shareIntent != null) {
+                startActivity(shareIntent);
+            }
+            return true;
+        }
+
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+
+        if ((mCurrentMovie != null) && (mFirstTrailer != null)) {
+            // Share option should be available
+            menu.findItem(R.id.menu_item_share).setVisible(true);
+        }
+        else {
+            menu.findItem(R.id.menu_item_share).setVisible(false);
+        }
+
+        return super.onPrepareOptionsMenu(menu);
     }
 
     private void fillMovieDetails(Movie movie) {
@@ -298,20 +337,35 @@ public class MovieDetailActivity extends AppCompatActivity {
                 setTrailersProgressView(false);
 
                 if ((trailerList != null) && (trailerList.size() > 0)) {
+                    // Update the adapter
                     ((TrailerAdapter) mRvTrailers.getAdapter()).setTrailers(trailerList);
                     mTvTrailersInfo.setVisibility(View.GONE);
+
+                    // Save the first trailer for sharing
+                    mFirstTrailer = trailerList.get(0);
                 }
                 else {
                     // No trailers...
                     mTvTrailersInfo.setVisibility(View.VISIBLE);
                     mTvTrailersInfo.setText(getString(R.string.movies_trailers_empty));
                 }
+
+                // Invalidate the option menu to enable or disable the trailer sharing
+                if (getSupportActionBar() != null) {
+                    invalidateOptionsMenu();
+                }
             }
 
             @Override
             public void onResultError(@Nullable String message) {
+
                 // Just show a snack...
                 showTrailersTryAgainSnack(R.string.movies_trailers_loading_error);
+
+                // Invalidate the option menu to enable or disable the trailer sharing
+                if (getSupportActionBar() != null) {
+                    invalidateOptionsMenu();
+                }
             }
         });
 
@@ -338,6 +392,24 @@ public class MovieDetailActivity extends AppCompatActivity {
         });
 
         snackbar.show();
+    }
+
+    private Intent getTrailerShareIntent() {
+
+        if ((mCurrentMovie == null) || (mFirstTrailer == null)) {
+            return null;
+        }
+
+        String url = String.format(Config.URL_YOUTUBE_WATCH, mFirstTrailer.getKey());
+
+        Intent sendIntent = new Intent();
+        sendIntent.setAction(Intent.ACTION_SEND);
+        sendIntent.putExtra(Intent.EXTRA_SUBJECT,
+                getString(R.string.movies_trailers_sharing_subject, mCurrentMovie.getTitle()));
+        sendIntent.putExtra(Intent.EXTRA_TEXT, url);
+        sendIntent.setType("text/plain");
+
+        return Intent.createChooser(sendIntent, getResources().getText(R.string.movies_trailers_sharing_chooser));
     }
 
     private void initMovieReviews() {

@@ -2,6 +2,7 @@
     <string name="app_name">Popular Movies</string>
     <string name="try_again">Try again</string>
     <string name="undo">Undo</string>
+    <string name="share">Share</string>
     <string name="no_internet">Oops! Internet isn\'t available</string>
     <string name="movies_loading_error">Oops! Couldn\'t load the movies…</string>
     <string name="movies_no_movies">Oops! No movies here yet…</string>
@@ -24,6 +25,8 @@
     <string name="movie_trailers_offline">Internet must be available to load the movie\'s trailers.</string>
     <string name="movies_trailers_loading_error">Oops! Couldn\'t load the trailers…</string>
     <string name="movies_trailers_empty">This movie has no trailer yet.</string>
+    <string name="movies_trailers_sharing_subject">See the %s amazing trailer!</string>
+    <string name="movies_trailers_sharing_chooser">Share the trailer with…</string>
 
     <string name="movie_reviews_title">Reviews:</string>
     <string name="movie_reviews_offline">Internet must be available to load the movie\'s reviews.</string>
