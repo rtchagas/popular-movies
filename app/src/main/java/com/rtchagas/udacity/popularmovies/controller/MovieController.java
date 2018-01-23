@@ -61,6 +61,10 @@ public class MovieController {
     }
 
     public void loadMoviesAsync(MovieSort criteria, @NonNull final OnSearchResultListener<Movie> resultListener) {
+        loadMoviesAsync(criteria, 1, resultListener);
+    }
+
+    public void loadMoviesAsync(MovieSort criteria, int page, @NonNull final OnSearchResultListener<Movie> resultListener) {
 
         Callback<MovieSearchResult> resultCallback = new Callback<MovieSearchResult>() {
 
@@ -78,10 +82,10 @@ public class MovieController {
         };
 
         if (MovieSort.POPULARITY == criteria) {
-            mTmdbApi.getPopular().enqueue(resultCallback);
+            mTmdbApi.getPopular(page).enqueue(resultCallback);
         }
         else {
-            mTmdbApi.getTopRated().enqueue(resultCallback);
+            mTmdbApi.getTopRated(page).enqueue(resultCallback);
         }
     }
 

@@ -9,6 +9,7 @@ import com.rtchagas.udacity.popularmovies.core.TrailerSearchResult;
 import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 /**
  * Interface to The Movie Database API REST services
@@ -20,10 +21,10 @@ public interface TmdbAPI {
     String BASE_IMG_BACKDROP_URL = "http://image.tmdb.org/t/p/w780/";
 
     @GET("movie/popular?api_key=" + Config.TMDB_API_KEY)
-    Call<MovieSearchResult> getPopular();
+    Call<MovieSearchResult> getPopular(@Query("page") int page);
 
     @GET("movie/top_rated?api_key=" + Config.TMDB_API_KEY)
-    Call<MovieSearchResult> getTopRated();
+    Call<MovieSearchResult> getTopRated(@Query("page") int page);
 
     @GET("movie/{id}?api_key=" + Config.TMDB_API_KEY)
     Call<Movie> getMovieDetails(@Path("id") int movieId);

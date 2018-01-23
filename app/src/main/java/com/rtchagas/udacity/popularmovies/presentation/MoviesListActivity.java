@@ -18,6 +18,7 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.rtchagas.udacity.popularmovies.Config;
 import com.rtchagas.udacity.popularmovies.R;
 import com.rtchagas.udacity.popularmovies.controller.MovieController;
 import com.rtchagas.udacity.popularmovies.controller.MovieController.MovieSort;
@@ -26,6 +27,7 @@ import com.rtchagas.udacity.popularmovies.core.Movie;
 import com.rtchagas.udacity.popularmovies.presentation.adapter.MovieBaseAdapter;
 import com.rtchagas.udacity.popularmovies.presentation.adapter.MovieCursorAdapter;
 import com.rtchagas.udacity.popularmovies.presentation.adapter.MovieListAdapter;
+import com.rtchagas.udacity.popularmovies.presentation.adapter.OnConsumedAllMoviesListener;
 import com.rtchagas.udacity.popularmovies.util.NetworkUtils;
 
 import java.util.ArrayList;
@@ -35,9 +37,10 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class MoviesListActivity extends AppCompatActivity implements OnSearchResultListener<Movie>,
-        View.OnClickListener, LoaderManager.LoaderCallbacks<Cursor> {
+        View.OnClickListener, LoaderManager.LoaderCallbacks<Cursor>, OnConsumedAllMoviesListener {
 
     private static final String STATE_KEY_MOVIE_LIST = "movie_list";
+    private static final String STATE_KEY_IS_PAGE_MODE = "is_page_mode";
     private static final String PREF_KEY_SORT_ORDER = "sort_order";
 
     private static final int ID_FAVORITES_LOADER = 100;
@@ -59,6 +62,8 @@ public class MoviesListActivity extends AppCompatActivity implements OnSearchRes
 
     private MovieSort mCurrentSortOrder = null;
 
+    private boolean mIsPagedMode = false;
+
     @Override
     @SuppressWarnings("unchecked")
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,7 +72,7 @@ public class MoviesListActivity extends AppCompatActivity implements OnSearchRes
         ButterKnife.bind(this);
         setSupportActionBar(mToolbar);
 
-        mMovieListAdapter = new MovieListAdapter(this);
+        mMovieListAdapter = new MovieListAdapter(this, this);
         mMovieCursorAdapter = new MovieCursorAdapter(this);
 
         // Configure the RecyclerView
@@ -85,6 +90,12 @@ public class MoviesListActivity extends AppCompatActivity implements OnSearchRes
             onResultReady((ArrayList<Movie>) savedInstanceState
                     .getSerializable(STATE_KEY_MOVIE_LIST));
         }
+
+        // Restore the page mode, if available
+        if ((savedInstanceState != null) && savedInstanceState.containsKey(STATE_KEY_IS_PAGE_MODE)) {
+            mIsPagedMode = savedInstanceState.getBoolean(STATE_KEY_IS_PAGE_MODE);
+        }
+
         // Load movies locally
         else if (MovieSort.FAVORITES == mCurrentSortOrder) {
             initFavoriteMovies();
@@ -126,12 +137,15 @@ public class MoviesListActivity extends AppCompatActivity implements OnSearchRes
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+
         // If movies came from cloud, lets store them to make things easier to the user.
         if ((MovieSort.FAVORITES != mCurrentSortOrder)
                 && (mMovieListAdapter != null) && (mMovieListAdapter.getData() != null)) {
             List<Movie> movieList = (List<Movie>) mMovieListAdapter.getData();
             outState.putSerializable(STATE_KEY_MOVIE_LIST, new ArrayList<>(movieList));
         }
+
+        outState.putBoolean(STATE_KEY_IS_PAGE_MODE, mIsPagedMode);
     }
 
     @Override
@@ -162,6 +176,9 @@ public class MoviesListActivity extends AppCompatActivity implements OnSearchRes
 
         mCurrentSortOrder = newOrder;
 
+        // Replace the entire adapter
+        mIsPagedMode = false;
+
         MovieController.getInstance()
                 .loadMoviesAsync(mCurrentSortOrder, this);
     }
@@ -176,16 +193,25 @@ public class MoviesListActivity extends AppCompatActivity implements OnSearchRes
     @Override
     public void onResultReady(@Nullable List<Movie> movieList) {
 
-        // Set the correct adapter to the recycler view
-        mMovieRecyclerView.setAdapter(mMovieListAdapter);
+        if (!mIsPagedMode) {
+            // Set the correct adapter to the recycler view
+            mMovieRecyclerView.setAdapter(mMovieListAdapter);
+        }
 
         if (movieList != null) {
+
             // Hide the loading progress
             setProgressView(false);
             // Hide/show the empty view
             setEmptyView(!(movieList.size() > 0));
+
             // Fill the adapter
-            mMovieListAdapter.swapData(movieList);
+            if (mIsPagedMode) {
+                mMovieListAdapter.appendMovies(movieList);
+            }
+            else {
+                mMovieListAdapter.swapData(movieList);
+            }
         }
     }
 
@@ -269,6 +295,7 @@ public class MoviesListActivity extends AppCompatActivity implements OnSearchRes
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+
         mMovieCursorAdapter.swapData(data);
 
         // Update the UI only if in favorites view.
@@ -283,5 +310,21 @@ public class MoviesListActivity extends AppCompatActivity implements OnSearchRes
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         mMovieCursorAdapter.swapData(null);
+    }
+
+    @Override
+    public void onConsumedAllMovies(int size) {
+
+        // Set current behavior to paged mode
+        mIsPagedMode = true;
+
+        // Calculate the next page
+        int nextPage = (size / Config.TMDB_PAGE_SIZE) + 1;
+
+        setProgressView(true);
+
+        // Fetch the next page
+        MovieController.getInstance()
+                .loadMoviesAsync(mCurrentSortOrder, nextPage, this);
     }
 }
