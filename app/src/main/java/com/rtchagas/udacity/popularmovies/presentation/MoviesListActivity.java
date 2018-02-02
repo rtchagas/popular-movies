@@ -97,7 +97,7 @@ public class MoviesListActivity extends AppCompatActivity implements OnSearchRes
         }
 
         // Load movies locally
-        else if (MovieSort.FAVORITES == mCurrentSortOrder) {
+        if (MovieSort.FAVORITES == mCurrentSortOrder) {
             initFavoriteMovies();
         }
         // Load movies from cloud
