@@ -90,19 +90,15 @@ public class MoviesListActivity extends AppCompatActivity implements OnSearchRes
             onResultReady((ArrayList<Movie>) savedInstanceState
                     .getSerializable(STATE_KEY_MOVIE_LIST));
         }
-
-        // Restore the page mode, if available
-        if ((savedInstanceState != null) && savedInstanceState.containsKey(STATE_KEY_IS_PAGE_MODE)) {
-            mIsPagedMode = savedInstanceState.getBoolean(STATE_KEY_IS_PAGE_MODE);
-        }
-
-        // Load movies locally
-        if (MovieSort.FAVORITES == mCurrentSortOrder) {
-            initFavoriteMovies();
-        }
-        // Load movies from cloud
         else {
-            loadMoviesAsync(mCurrentSortOrder, true);
+            // Load movies locally
+            if (MovieSort.FAVORITES == mCurrentSortOrder) {
+                initFavoriteMovies();
+            }
+            // Load movies from cloud
+            else {
+                loadMoviesAsync(mCurrentSortOrder, true);
+            }
         }
 
         // Init the favorites loader
@@ -144,8 +140,6 @@ public class MoviesListActivity extends AppCompatActivity implements OnSearchRes
             List<Movie> movieList = (List<Movie>) mMovieListAdapter.getData();
             outState.putSerializable(STATE_KEY_MOVIE_LIST, new ArrayList<>(movieList));
         }
-
-        outState.putBoolean(STATE_KEY_IS_PAGE_MODE, mIsPagedMode);
     }
 
     @Override
